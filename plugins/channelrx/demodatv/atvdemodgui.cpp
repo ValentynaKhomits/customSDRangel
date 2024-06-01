@@ -101,7 +101,7 @@ void ATVDemodGUI::displaySettings()
     ui->synchLevelText->setText(QString("%1 mV").arg((int) (m_settings.m_levelSynchroTop * 1000.0f)));
     ui->blackLevel->setValue((int) (m_settings.m_levelBlack * 1000.0f));
     ui->blackLevelText->setText(QString("%1 mV").arg((int) (m_settings.m_levelBlack * 1000.0f)));
-    ui->modulation->setCurrentIndex((int) m_settings.m_atvModulation);
+   // ui->modulation->setCurrentIndex((int) m_settings.m_atvModulation);
     ui->fps->setCurrentIndex(ATVDemodSettings::getFpsIndex(m_settings.m_fps));
     ui->nbLines->setCurrentIndex(ATVDemodSettings::getNumberOfLinesIndex(m_settings.m_nbLines));
     ui->hSync->setChecked(m_settings.m_hSync);
@@ -113,16 +113,16 @@ void ATVDemodGUI::displaySettings()
     topTimeUpdate();
 
     //********** RF values **********
-    ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
-    ui->rfFiltering->setChecked(m_settings.m_fftFiltering);
-    ui->bfo->setValue(m_settings.m_bfoFrequency);
-    ui->bfoText->setText(QString("%1").arg(m_settings.m_bfoFrequency * 1.0, 0, 'f', 0));
-    ui->fmDeviation->setValue((int) (m_settings.m_fmDeviation * 1000.0f));
-    ui->fmDeviationText->setText(QString("%1").arg(m_settings.m_fmDeviation * 100.0, 0, 'f', 1));
-    ui->amScaleFactor->setValue(m_settings.m_amScalingFactor);
-    ui->amScaleFactorText->setText(QString("%1").arg(m_settings.m_amScalingFactor));
-    ui->amScaleOffset->setValue(m_settings.m_amOffsetFactor);
-    ui->amScaleOffsetText->setText(QString("%1").arg(m_settings.m_amOffsetFactor));
+//    ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
+//    ui->rfFiltering->setChecked(m_settings.m_fftFiltering);
+//    ui->bfo->setValue(m_settings.m_bfoFrequency);
+//    ui->bfoText->setText(QString("%1").arg(m_settings.m_bfoFrequency * 1.0, 0, 'f', 0));
+//    ui->fmDeviation->setValue((int) (m_settings.m_fmDeviation * 1000.0f));
+//    ui->fmDeviationText->setText(QString("%1").arg(m_settings.m_fmDeviation * 100.0, 0, 'f', 1));
+//    ui->amScaleFactor->setValue(m_settings.m_amScalingFactor);
+//    ui->amScaleFactorText->setText(QString("%1").arg(m_settings.m_amScalingFactor));
+//    ui->amScaleOffset->setValue(m_settings.m_amOffsetFactor);
+//    ui->amScaleOffsetText->setText(QString("%1").arg(m_settings.m_amOffsetFactor));
 
     applySampleRate();
     getRollupContents()->restoreState(m_rollupState);
@@ -135,12 +135,12 @@ void ATVDemodGUI::displayRFBandwidths()
 {
     int sliderPosition = m_settings.m_fftBandwidth / m_rfSliderDivisor;
     sliderPosition = sliderPosition < 1 ? 1 : sliderPosition > 100 ? 100 : sliderPosition;
-    ui->rfBW->setValue(sliderPosition);
-    ui->rfBWText->setText(QString("%1k").arg((sliderPosition * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
+//    ui->rfBW->setValue(sliderPosition);
+//    ui->rfBWText->setText(QString("%1k").arg((sliderPosition * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
     sliderPosition = m_settings.m_fftOppBandwidth / m_rfSliderDivisor;
     sliderPosition = sliderPosition < 0 ? 0 : sliderPosition > 100 ? 100 : sliderPosition;
-    ui->rfOppBW->setValue(sliderPosition);
-    ui->rfOppBWText->setText(QString("%1k").arg((sliderPosition * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
+//    ui->rfOppBW->setValue(sliderPosition);
+//    ui->rfOppBWText->setText(QString("%1k").arg((sliderPosition * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
 }
 
 void ATVDemodGUI::applySampleRate()
@@ -149,8 +149,8 @@ void ATVDemodGUI::applySampleRate()
     unsigned int nbPointsPerLine;
     ATVDemodSettings::getBaseValues(m_basebandSampleRate, m_settings.m_fps*m_settings.m_nbLines, nbPointsPerLine);
     float samplesPerLineFrac = (float) m_basebandSampleRate / (m_settings.m_nbLines * m_settings.m_fps) - nbPointsPerLine;
-    ui->tvSampleRateText->setText(tr("%1k").arg(m_basebandSampleRate/1000.0f, 0, 'f', 2));
-    ui->nbPointsPerLineText->setText(tr("%1p+%2").arg(nbPointsPerLine).arg(samplesPerLineFrac, 0, 'f', 2));
+//    ui->tvSampleRateText->setText(tr("%1k").arg(m_basebandSampleRate/1000.0f, 0, 'f', 2));
+//    ui->nbPointsPerLineText->setText(tr("%1p+%2").arg(nbPointsPerLine).arg(samplesPerLineFrac, 0, 'f', 2));
     m_scopeVis->setLiveRate(m_basebandSampleRate);
     setRFFiltersSlidersRange(m_basebandSampleRate);
     displayRFBandwidths();
@@ -166,8 +166,8 @@ bool ATVDemodGUI::handleMessage(const Message& message)
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
         m_basebandSampleRate = notif.getSampleRate();
         m_deviceCenterFrequency = notif.getCenterFrequency();
-        ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
-        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
+//        ui->deltaFrequency->setValueRange(false, 8, -m_basebandSampleRate/2, m_basebandSampleRate/2);
+//        ui->deltaFrequencyLabel->setToolTip(tr("Range %1 %L2 Hz").arg(QChar(0xB1)).arg(m_basebandSampleRate/2));
         updateAbsoluteCenterFrequency();
         applySampleRate();
 
@@ -182,7 +182,7 @@ bool ATVDemodGUI::handleMessage(const Message& message)
 void ATVDemodGUI::channelMarkerChangedByCursor()
 {
     qDebug("ATVDemodGUI::channelMarkerChangedByCursor");
-    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+//    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     applySettings();
 }
@@ -291,9 +291,9 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
-    ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
-    ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->deltaFrequency->setValueRange(false, 8, -99999999, 99999999);
+//    ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
+//    ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+//    ui->deltaFrequency->setValueRange(false, 8, -99999999, 99999999);
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.setColor(Qt::white);
@@ -331,7 +331,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
     QChar delta = QChar(0x94, 0x03);
-    ui->fmDeviationLabel->setText(delta);
+//    ui->fmDeviationLabel->setText(delta);
 
     makeUIConnections();
     DialPopup::addPopupsToChildDials(this);
@@ -358,37 +358,37 @@ void ATVDemodGUI::setChannelMarkerBandwidth()
 {
     // avoid infinite recursion
     m_channelMarker.blockSignals(true);
-    ui->rfFiltering->blockSignals(true);
-    ui->rfBW->blockSignals(true);
-    ui->rfOppBW->blockSignals(true);
-    ui->modulation->blockSignals(true);
+//    ui->rfFiltering->blockSignals(true);
+//    ui->rfBW->blockSignals(true);
+//    ui->rfOppBW->blockSignals(true);
+//    ui->modulation->blockSignals(true);
 
-    if (ui->rfFiltering->isChecked()) // FFT filter
-    {
-        m_channelMarker.setBandwidth(ui->rfBW->value()*m_rfSliderDivisor);
-        m_channelMarker.setOppositeBandwidth(ui->rfOppBW->value()*m_rfSliderDivisor);
+//    if (ui->rfFiltering->isChecked()) // FFT filter
+   // {
+//        m_channelMarker.setBandwidth(ui->rfBW->value()*m_rfSliderDivisor);
+//        m_channelMarker.setOppositeBandwidth(ui->rfOppBW->value()*m_rfSliderDivisor);
 
-        if (ui->modulation->currentIndex() == (int) ATVDemodSettings::ATV_LSB) {
-            m_channelMarker.setSidebands(ChannelMarker::vlsb);
-        } else if (ui->modulation->currentIndex() == (int) ATVDemodSettings::ATV_USB) {
-            m_channelMarker.setSidebands(ChannelMarker::vusb);
-        } else {
-            m_channelMarker.setSidebands(ChannelMarker::vusb);
-        }
-    }
-    else
-    {
+//        if (ui->modulation->currentIndex() == (int) ATVDemodSettings::ATV_LSB) {
+           // m_channelMarker.setSidebands(ChannelMarker::vlsb);
+//        } else if (ui->modulation->currentIndex() == (int) ATVDemodSettings::ATV_USB) {
+           // m_channelMarker.setSidebands(ChannelMarker::vusb);
+        //} else {
+//m_channelMarker.setSidebands(ChannelMarker::vusb);
+//}
+    //
+   // else
+   // {
         m_channelMarker.setBandwidth(m_basebandSampleRate);
         m_channelMarker.setSidebands(ChannelMarker::dsb);
-    }
+  //  }
 
     m_channelMarker.blockSignals(false);
     m_channelMarker.emitChangedByAPI();
 
-    ui->rfFiltering->blockSignals(false);
-    ui->rfBW->blockSignals(false);
-    ui->rfOppBW->blockSignals(false);
-    ui->modulation->blockSignals(false);
+//    ui->rfFiltering->blockSignals(false);
+//    ui->rfBW->blockSignals(false);
+//    ui->rfOppBW->blockSignals(false);
+//    ui->modulation->blockSignals(false);
 }
 
 void ATVDemodGUI::setRFFiltersSlidersRange(int sampleRate)
@@ -401,19 +401,19 @@ void ATVDemodGUI::setRFFiltersSlidersRange(int sampleRate)
         m_rfSliderDivisor /= 10;
     }
 
-    if (ui->rfFiltering->isChecked())
-    {
-        ui->rfBW->setMaximum((sampleRate) / (2*m_rfSliderDivisor));
-        ui->rfOppBW->setMaximum((sampleRate) / (2*m_rfSliderDivisor));
-    }
-    else
-    {
-        ui->rfBW->setMaximum((sampleRate) / m_rfSliderDivisor);
-        ui->rfOppBW->setMaximum((sampleRate) / m_rfSliderDivisor);
-    }
+//    if (ui->rfFiltering->isChecked())
+    //{
+    //    ui->rfBW->setMaximum((sampleRate) / (2*m_rfSliderDivisor));
+    //    ui->rfOppBW->setMaximum((sampleRate) / (2*m_rfSliderDivisor));
+    //}
+    //else
+    //{
+    //    ui->rfBW->setMaximum((sampleRate) / m_rfSliderDivisor);
+    //    ui->rfOppBW->setMaximum((sampleRate) / m_rfSliderDivisor);
+    //}
 
-    ui->rfBWText->setText(QString("%1k").arg((ui->rfBW->value() * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
-    ui->rfOppBWText->setText(QString("%1k").arg((ui->rfOppBW->value() * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
+////    ui->rfBWText->setText(QString("%1k").arg((ui->rfBW->value() * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
+//    ui->rfOppBWText->setText(QString("%1k").arg((ui->rfOppBW->value() * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
 }
 
 void ATVDemodGUI::leaveEvent(QEvent* event)
@@ -440,12 +440,12 @@ void ATVDemodGUI::tick()
         {
             m_objMagSqAverage(m_atvDemod->getMagSq());
             double magSqDB = CalcDb::dbPower(m_objMagSqAverage / (SDR_RX_SCALED*SDR_RX_SCALED));
-            ui->channePowerText->setText(tr("%1 dB").arg(magSqDB, 0, 'f', 1));
+//            ui->channePowerText->setText(tr("%1 dB").arg(magSqDB, 0, 'f', 1));
 
             if (m_atvDemod->getBFOLocked()) {
-                ui->bfoLockedLabel->setStyleSheet("QLabel { background-color : green; }");
+//                ui->bfoLockedLabel->setStyleSheet("QLabel { background-color : green; }");
             } else {
-                ui->bfoLockedLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+//                ui->bfoLockedLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
             }
         }
 
@@ -530,7 +530,7 @@ void ATVDemodGUI::on_modulation_currentIndexChanged(int index)
 void ATVDemodGUI::on_rfBW_valueChanged(int value)
 {
     m_settings.m_fftBandwidth = value * m_rfSliderDivisor;
-    ui->rfBWText->setText(QString("%1k").arg((value * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
+//    ui->rfBWText->setText(QString("%1k").arg((value * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
     setChannelMarkerBandwidth();
     applySettings();
 }
@@ -538,7 +538,7 @@ void ATVDemodGUI::on_rfBW_valueChanged(int value)
 void ATVDemodGUI::on_rfOppBW_valueChanged(int value)
 {
     m_settings.m_fftOppBandwidth = value * m_rfSliderDivisor;
-    ui->rfOppBWText->setText(QString("%1k").arg((value * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
+//    ui->rfOppBWText->setText(QString("%1k").arg((value * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
     setChannelMarkerBandwidth();
     applySettings();
 }
@@ -562,30 +562,30 @@ void ATVDemodGUI::on_deltaFrequency_changed(qint64 value)
 void ATVDemodGUI::on_bfo_valueChanged(int value)
 {
     m_settings.m_bfoFrequency = value;
-    ui->bfoText->setText(QString("%1").arg(value * 1.0, 0, 'f', 0));
+//    ui->bfoText->setText(QString("%1").arg(value * 1.0, 0, 'f', 0));
     applySettings();
 }
 
 void ATVDemodGUI::on_fmDeviation_valueChanged(int value)
 {
     m_settings.m_fmDeviation = value / 1000.0f;
-    ui->fmDeviationText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
+//    ui->fmDeviationText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
     applySettings();
 }
 
 void ATVDemodGUI::on_amScaleFactor_valueChanged(int value)
 {
     m_settings.m_amScalingFactor = value;
-    ui->amScaleFactor->setValue(m_settings.m_amScalingFactor);
-    ui->amScaleFactorText->setText(QString("%1").arg(m_settings.m_amScalingFactor));
+//    ui->amScaleFactor->setValue(m_settings.m_amScalingFactor);
+//    ui->amScaleFactorText->setText(QString("%1").arg(m_settings.m_amScalingFactor));
     applySettings();
 }
 
 void ATVDemodGUI::on_amScaleOffset_valueChanged(int value)
 {
     m_settings.m_amOffsetFactor = value;
-    ui->amScaleOffset->setValue(m_settings.m_amOffsetFactor);
-    ui->amScaleOffsetText->setText(QString("%1").arg(m_settings.m_amOffsetFactor));
+//    ui->amScaleOffset->setValue(m_settings.m_amOffsetFactor);
+//    ui->amScaleOffsetText->setText(QString("%1").arg(m_settings.m_amOffsetFactor));
     applySettings();
 }
 
@@ -634,19 +634,19 @@ void ATVDemodGUI::makeUIConnections()
     QObject::connect(ui->vSync, &QCheckBox::clicked, this, &ATVDemodGUI::on_vSync_clicked);
     QObject::connect(ui->invertVideo, &QCheckBox::clicked, this, &ATVDemodGUI::on_invertVideo_clicked);
     QObject::connect(ui->halfImage, &QCheckBox::clicked, this, &ATVDemodGUI::on_halfImage_clicked);
-    QObject::connect(ui->modulation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_modulation_currentIndexChanged);
+//    QObject::connect(ui->modulation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_modulation_currentIndexChanged);
     QObject::connect(ui->nbLines, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_nbLines_currentIndexChanged);
     QObject::connect(ui->fps, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_fps_currentIndexChanged);
     QObject::connect(ui->standard, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_standard_currentIndexChanged);
     QObject::connect(ui->reset, &QPushButton::clicked, this, &ATVDemodGUI::on_reset_clicked);
-    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &ATVDemodGUI::on_rfBW_valueChanged);
-    QObject::connect(ui->rfOppBW, &QSlider::valueChanged, this, &ATVDemodGUI::on_rfOppBW_valueChanged);
-    QObject::connect(ui->rfFiltering, &ButtonSwitch::toggled, this, &ATVDemodGUI::on_rfFiltering_toggled);
-    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &ATVDemodGUI::on_deltaFrequency_changed);
-    QObject::connect(ui->bfo, &QDial::valueChanged, this, &ATVDemodGUI::on_bfo_valueChanged);
-    QObject::connect(ui->fmDeviation, &QDial::valueChanged, this, &ATVDemodGUI::on_fmDeviation_valueChanged);
-    QObject::connect(ui->amScaleFactor, &QDial::valueChanged, this, &ATVDemodGUI::on_amScaleFactor_valueChanged);
-    QObject::connect(ui->amScaleOffset, &QDial::valueChanged, this, &ATVDemodGUI::on_amScaleOffset_valueChanged);
+//    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &ATVDemodGUI::on_rfBW_valueChanged);
+//    QObject::connect(ui->rfOppBW, &QSlider::valueChanged, this, &ATVDemodGUI::on_rfOppBW_valueChanged);
+//    QObject::connect(ui->rfFiltering, &ButtonSwitch::toggled, this, &ATVDemodGUI::on_rfFiltering_toggled);
+//    QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &ATVDemodGUI::on_deltaFrequency_changed);
+//////    QObject::connect(ui->bfo, &QDial::valueChanged, this, &ATVDemodGUI::on_bfo_valueChanged);
+//////    QObject::connect(ui->fmDeviation, &QDial::valueChanged, this, &ATVDemodGUI::on_fmDeviation_valueChanged);
+//    QObject::connect(ui->amScaleFactor, &QDial::valueChanged, this, &ATVDemodGUI::on_amScaleFactor_valueChanged);
+//    QObject::connect(ui->amScaleOffset, &QDial::valueChanged, this, &ATVDemodGUI::on_amScaleOffset_valueChanged);
     QObject::connect(ui->screenTabWidget, &QTabWidget::currentChanged, this, &ATVDemodGUI::on_screenTabWidget_currentChanged);
 }
 

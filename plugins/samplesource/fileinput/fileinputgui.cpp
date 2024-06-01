@@ -59,7 +59,7 @@ FileInputGUI::FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     sizeToContents();
     getContents()->setStyleSheet("#FileInputGUI { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/fileinput/readme.md";
-	ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+	//ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 
 	connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -67,11 +67,11 @@ FileInputGUI::FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
-	setAccelerationCombo();
+	//setAccelerationCombo();
 	displaySettings();
 
 	ui->navTimeSlider->setEnabled(false);
-	ui->acceleration->setEnabled(false);
+	//ui->acceleration->setEnabled(false);
 
     m_sampleSource = m_deviceUISet->m_deviceAPI->getSampleSource();
 
@@ -195,9 +195,9 @@ bool FileInputGUI::handleMessage(const Message& message)
 	{
 	    FileInput::MsgPlayPause& notif = (FileInput::MsgPlayPause&) message;
 	    bool checked = notif.getPlayPause();
-	    ui->play->setChecked(checked);
+	   // ui->play->setChecked(checked);
 	    ui->navTimeSlider->setEnabled(!checked);
-	    ui->acceleration->setEnabled(!checked);
+	    //ui->acceleration->setEnabled(!checked);
 	    m_enableNavTime = !checked;
 
 	    return true;
@@ -205,11 +205,11 @@ bool FileInputGUI::handleMessage(const Message& message)
 	else if (FileInput::MsgReportHeaderCRC::match(message))
 	{
 		FileInput::MsgReportHeaderCRC& notif = (FileInput::MsgReportHeaderCRC&) message;
-		if (notif.isOK()) {
-			ui->crcLabel->setStyleSheet("QLabel { background-color : green; }");
-		} else {
-			ui->crcLabel->setStyleSheet("QLabel { background-color : red; }");
-		}
+		//if (notif.isOK()) {
+		//	ui->crcLabel->setStyleSheet("QLabel { background-color : green; }");
+		//} else {
+		//	ui->crcLabel->setStyleSheet("QLabel { background-color : red; }");
+		//}
 
 		return true;
 	}
@@ -223,17 +223,17 @@ void FileInputGUI::updateSampleRateAndFrequency()
 {
     m_deviceUISet->getSpectrum()->setSampleRate(m_deviceSampleRate);
     m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
-    ui->deviceRateText->setText(tr("%1k").arg((float)m_deviceSampleRate / 1000));
+    //ui->deviceRateText->setText(tr("%1k").arg((float)m_deviceSampleRate / 1000));
 }
 
 void FileInputGUI::displaySettings()
 {
     blockApplySettings(true);
-    ui->playLoop->setChecked(m_settings.m_loop);
-    ui->acceleration->setCurrentIndex(FileInputSettings::getAccelerationIndex(m_settings.m_accelerationFactor));
+  //  ui->playLoop->setChecked(m_settings.m_loop);
+   // ui->acceleration->setCurrentIndex(FileInputSettings::getAccelerationIndex(m_settings.m_accelerationFactor));
     if (!m_settings.m_fileName.isEmpty() && (m_settings.m_fileName != ui->fileNameText->text()))
     {
-	ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+	//ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 	configureFileName();
     }
     ui->fileNameText->setText(m_settings.m_fileName);
@@ -297,7 +297,7 @@ void FileInputGUI::on_play_toggled(bool checked)
 	FileInput::MsgConfigureFileInputWork* message = FileInput::MsgConfigureFileInputWork::create(checked);
 	m_sampleSource->getInputMessageQueue()->push(message);
 	ui->navTimeSlider->setEnabled(!checked);
-	ui->acceleration->setEnabled(!checked);
+	//ui->acceleration->setEnabled(!checked);
 	m_enableNavTime = !checked;
 }
 
@@ -321,7 +321,7 @@ void FileInputGUI::on_showFileDialog_clicked(bool checked)
 	{
 		m_settings.m_fileName = fileName;
 		ui->fileNameText->setText(m_settings.m_fileName);
-		ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+		//ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 		configureFileName();
 	}
 }
@@ -345,21 +345,21 @@ void FileInputGUI::configureFileName()
 
 void FileInputGUI::updateWithAcquisition()
 {
-	ui->play->setEnabled(m_acquisition);
-	ui->play->setChecked(m_acquisition);
+	//ui->play->setEnabled(m_acquisition);
+	//ui->play->setChecked(m_acquisition);
 	ui->showFileDialog->setEnabled(!m_acquisition);
 }
 
 void FileInputGUI::updateWithStreamData()
 {
 	ui->centerFrequency->setText(tr("%L1").arg(m_centerFrequency));
-	ui->sampleRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
-	ui->sampleSizeText->setText(tr("%1b").arg(m_sampleSize));
-	ui->play->setEnabled(m_acquisition);
+	//ui->sampleRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
+	//ui->sampleSizeText->setText(tr("%1b").arg(m_sampleSize));
+	//ui->play->setEnabled(m_acquisition);
 	QTime recordLength(0, 0, 0, 0);
 	recordLength = recordLength.addMSecs(m_recordLengthMuSec/1000UL);
 	QString s_time = recordLength.toString("HH:mm:ss.zzz");
-	ui->recordLengthText->setText(s_time);
+	//ui->recordLengthText->setText(s_time);
 	updateWithStreamTime();
 }
 
@@ -378,14 +378,14 @@ void FileInputGUI::updateWithStreamTime()
 	t = t.addSecs(t_sec);
 	t = t.addMSecs(t_msec);
 	QString s_timems = t.toString("HH:mm:ss.zzz");
-	ui->relTimeText->setText(s_timems);
+	//ui->relTimeText->setText(s_timems);
 
     qint64 startingTimeStampMsec = m_startingTimeStamp;
     QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
     dt = dt.addSecs(t_sec);
     dt = dt.addMSecs(t_msec);
 	QString s_date = dt.toString("yyyy-MM-dd HH:mm:ss.zzz");
-	ui->absTimeText->setText(s_date);
+	//ui->absTimeText->setText(s_date);
 
 	if (!m_enableNavTime)
 	{
@@ -402,29 +402,29 @@ void FileInputGUI::tick()
 	}
 }
 
-void FileInputGUI::setAccelerationCombo()
-{
-    ui->acceleration->blockSignals(true);
-    ui->acceleration->clear();
-    ui->acceleration->addItem(QString("1"));
-
-    for (unsigned int i = 0; i <= FileInputSettings::m_accelerationMaxScale; i++)
-    {
-        QString s;
-        int m = pow(10.0, i);
-        int x = 2*m;
-        setNumberStr(x, s);
-        ui->acceleration->addItem(s);
-        x = 5*m;
-        setNumberStr(x, s);
-        ui->acceleration->addItem(s);
-        x = 10*m;
-        setNumberStr(x, s);
-        ui->acceleration->addItem(s);
-    }
-
-    ui->acceleration->blockSignals(false);
-}
+//void FileInputGUI::setAccelerationCombo()
+//{
+//    ui->acceleration->blockSignals(true);
+//    ui->acceleration->clear();
+//    ui->acceleration->addItem(QString("1"));
+//
+//    for (unsigned int i = 0; i <= FileInputSettings::m_accelerationMaxScale; i++)
+//    {
+//        QString s;
+//        int m = pow(10.0, i);
+//        int x = 2*m;
+//        setNumberStr(x, s);
+//        ui->acceleration->addItem(s);
+//        x = 5*m;
+//        setNumberStr(x, s);
+//        ui->acceleration->addItem(s);
+//        x = 10*m;
+//        setNumberStr(x, s);
+//        ui->acceleration->addItem(s);
+//    }
+//
+//    ui->acceleration->blockSignals(false);
+//}
 
 void FileInputGUI::setNumberStr(int n, QString& s)
 {
@@ -469,9 +469,9 @@ void FileInputGUI::openDeviceSettingsDialog(const QPoint& p)
 void FileInputGUI::makeUIConnections()
 {
     QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &FileInputGUI::on_startStop_toggled);
-    QObject::connect(ui->playLoop, &ButtonSwitch::toggled, this, &FileInputGUI::on_playLoop_toggled);
-    QObject::connect(ui->play, &ButtonSwitch::toggled, this, &FileInputGUI::on_play_toggled);
-    QObject::connect(ui->navTimeSlider, &QSlider::valueChanged, this, &FileInputGUI::on_navTimeSlider_valueChanged);
+    //QObject::connect(ui->playLoop, &ButtonSwitch::toggled, this, &FileInputGUI::on_playLoop_toggled);
+   // QObject::connect(ui->play, &ButtonSwitch::toggled, this, &FileInputGUI::on_play_toggled);
+    //QObject::connect(ui->navTimeSlider, &QSlider::valueChanged, this, &FileInputGUI::on_navTimeSlider_valueChanged);
     QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &FileInputGUI::on_showFileDialog_clicked);
-    QObject::connect(ui->acceleration, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FileInputGUI::on_acceleration_currentIndexChanged);
+    //QObject::connect(ui->acceleration, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FileInputGUI::on_acceleration_currentIndexChanged);
 }

@@ -177,15 +177,15 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_closeButton->setToolTip("Hide workspace");
     m_closeButton->setFixedSize(20, 20);
 
-    m_titleBarLayout->addWidget(m_titleLabel);
+    //m_titleBarLayout->addWidget(m_titleLabel);
     if (m_menuButton) {
         m_titleBarLayout->addWidget(m_menuButton);
     }
-    m_titleBarLayout->addWidget(m_configurationPresetsButton);
-    m_titleBarLayout->addWidget(m_startStopButton);
+   // m_titleBarLayout->addWidget(m_configurationPresetsButton);
+    //m_titleBarLayout->addWidget(m_startStopButton);
     m_titleBarLayout->addWidget(m_vline1);
     m_titleBarLayout->addWidget(m_addRxDeviceButton);
-    m_titleBarLayout->addWidget(m_addTxDeviceButton);
+   /* m_titleBarLayout->addWidget(m_addTxDeviceButton);
     m_titleBarLayout->addWidget(m_addMIMODeviceButton);
     m_titleBarLayout->addWidget(m_vline2);
     m_titleBarLayout->addWidget(m_addFeatureButton);
@@ -195,14 +195,14 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_titleBarLayout->addWidget(m_tileSubWindows);
     m_titleBarLayout->addWidget(m_stackVerticalSubWindows);
     m_titleBarLayout->addWidget(m_stackSubWindows);
-    m_titleBarLayout->addWidget(m_tabSubWindows);
+    m_titleBarLayout->addWidget(m_tabSubWindows);*/
     m_titleBarLayout->addStretch(1);
 #ifndef ANDROID
     // Can't undock on Android, as windows don't have title bars to allow them to be moved
-    m_titleBarLayout->addWidget(m_normalButton);
+    //m_titleBarLayout->addWidget(m_normalButton);
     // Don't allow workspaces to be hidden on Android, as if all are hidden, they'll
     // be no way to redisplay them, as we currently don't have a main menu bar
-    m_titleBarLayout->addWidget(m_closeButton);
+   // m_titleBarLayout->addWidget(m_closeButton);
 #else
     setFeatures(QDockWidget::NoDockWidgetFeatures);
 #endif
@@ -215,7 +215,7 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
         &Workspace::addRxDeviceClicked
     );
 
-    QObject::connect(
+ /*   QObject::connect(
         m_addTxDeviceButton,
         &QPushButton::clicked,
         this,
@@ -241,16 +241,16 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
         &QPushButton::clicked,
         this,
         &Workspace::featurePresetsDialog
-    );
+    );*/
 
-    QObject::connect(
-        m_configurationPresetsButton,
-        &QPushButton::clicked,
-        this,
-        &Workspace::configurationPresetsDialog
-    );
+    //QObject::connect(
+    //    m_configurationPresetsButton,
+    //    &QPushButton::clicked,
+    //    this,
+    //    &Workspace::configurationPresetsDialog
+    //);
 
-    QObject::connect(
+  /*  QObject::connect(
         m_cascadeSubWindows,
         &QPushButton::clicked,
         this,
@@ -297,7 +297,7 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
         &QPushButton::clicked,
         this,
         &Workspace::toggleFloating
-    );
+    );*/
 
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(hide()));
 

@@ -41,13 +41,13 @@ void ATVDemodSettings::resetToDefaults()
     m_fftFiltering = false;
     m_fftOppBandwidth = 0;
     m_fftBandwidth = 6000;
-    m_nbLines = 625;
-    m_fps = 25;
-    m_atvStd = ATVStdPAL625;
-    m_hSync = false;
-    m_vSync = false;
+    m_nbLines = 525;
+    m_fps = 30;
+    m_atvStd = ATVStdPAL525;
+    m_hSync = true;
+    m_vSync = true;
     m_invertVideo = false;
-    m_halfFrames = false; // m_fltRatioOfRowsToDisplay = 1.0
+    m_halfFrames = true; // m_fltRatioOfRowsToDisplay = 1.0
     m_levelSynchroTop = 0.15f;
     m_levelBlack = 0.3f;
     m_rgbColor = QColor(255, 255, 255).rgb();

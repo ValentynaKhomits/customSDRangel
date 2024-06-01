@@ -61,9 +61,7 @@ public:
     DeviceAPI(
         StreamType streamType,
         int deviceTabIndex,
-        DSPDeviceSourceEngine *deviceSourceEngine,
-        DSPDeviceSinkEngine *deviceSinkEngine,
-        DSPDeviceMIMOEngine *deviceMIMOEngine
+        DSPDeviceSourceEngine *deviceSourceEngine
     );
     ~DeviceAPI();
 

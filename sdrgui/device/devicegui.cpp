@@ -151,19 +151,11 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
 
     m_topLayout = new QHBoxLayout();
     m_topLayout->setContentsMargins(0, 0, 0, 0);
-    m_topLayout->addWidget(m_indexLabel);
-    m_topLayout->addWidget(m_settingsButton);
-    m_topLayout->addWidget(m_changeDeviceButton);
-    m_topLayout->addWidget(m_reloadDeviceButton);
-    m_topLayout->addWidget(m_deviceSetPresetsButton);
     m_topLayout->addWidget(m_addChannelsButton);
     m_topLayout->addWidget(m_titleLabel);
     // m_topLayout->addStretch(1);
-    m_topLayout->addWidget(m_helpButton);
-    m_topLayout->addWidget(m_moveButton);
-    m_topLayout->addWidget(m_shrinkButton);
-    m_topLayout->addWidget(m_maximizeButton);
     m_topLayout->addWidget(m_closeButton);
+
 
     m_centerLayout = new QVBoxLayout();
     m_centerLayout->setContentsMargins(0, 0, 0, 0);
@@ -172,8 +164,6 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
 
     m_bottomLayout = new QHBoxLayout();
     m_bottomLayout->setContentsMargins(0, 0, 0, 0);
-    m_bottomLayout->addWidget(m_showSpectrumButton);
-    m_bottomLayout->addWidget(m_showAllChannelsButton);
     m_bottomLayout->addWidget(m_statusLabel);
     m_sizeGripBottomRight = new QSizeGrip(this);
     m_sizeGripBottomRight->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -188,19 +178,10 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     QObjectCleanupHandler().add(layout());
     setLayout(m_layouts);
 
-    connect(m_settingsButton, SIGNAL(clicked()), this, SLOT(activateSettingsDialog()));
-    connect(m_changeDeviceButton, SIGNAL(clicked()), this, SLOT(openChangeDeviceDialog()));
-    connect(m_reloadDeviceButton, SIGNAL(clicked()), this, SLOT(deviceReload()));
     connect(m_addChannelsButton, SIGNAL(clicked()), this, SLOT(openAddChannelsDialog()));
-    connect(m_deviceSetPresetsButton, SIGNAL(clicked()), this, SLOT(deviceSetPresetsDialog()));
-    connect(m_helpButton, SIGNAL(clicked()), this, SLOT(showHelp()));
-    connect(m_moveButton, SIGNAL(clicked()), this, SLOT(openMoveToWorkspaceDialog()));
     connect(m_shrinkButton, SIGNAL(clicked()), this, SLOT(shrinkWindow()));
-    connect(m_maximizeButton, SIGNAL(clicked()), this, SLOT(maximizeWindow()));
     connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(close()));
-    connect(m_showSpectrumButton, SIGNAL(clicked()), this, SLOT(showSpectrumHandler()));
-    connect(m_showAllChannelsButton, SIGNAL(clicked()), this, SLOT(showAllChannelsHandler()));
 
     QObject::connect(
         &m_channelAddDialog,
@@ -208,6 +189,7 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
         this,
         &DeviceGUI::addChannelEmitted
     );
+    m_addChannelsButton->click();
 }
 
 DeviceGUI::~DeviceGUI()

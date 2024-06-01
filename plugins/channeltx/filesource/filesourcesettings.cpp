@@ -32,7 +32,7 @@ FileSourceSettings::FileSourceSettings()
 void FileSourceSettings::resetToDefaults()
 {
     m_fileName = "test.sdriq";
-    m_loop = false;
+    m_loop = true;
     m_log2Interp = 0;
     m_filterChainHash = 0;
     m_gainDB = 0;

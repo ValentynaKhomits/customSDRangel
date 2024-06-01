@@ -169,7 +169,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     setWindowIcon(QIcon(":/sdrangel_icon.png"));
 #ifndef ANDROID
     // To save screen space on Android, don't have menu bar. Instead menus are accessed via toolbar button
-    createMenuBar(nullptr);
+    //createMenuBar(nullptr);
     createStatusBar();
 #endif
 
@@ -292,7 +292,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	m_apiServer = new WebAPIServer(m_apiHost, m_apiPort, m_requestMapper);
 	m_apiServer->start();
 
-    m_dspEngine->setMIMOSupport(true);
+    m_dspEngine->setMIMOSupport(false);
 
     delete splash;
 
@@ -361,7 +361,7 @@ void MainWindow::sampleSourceAdd(Workspace *deviceWorkspace, Workspace *spectrum
     m_deviceUIs.back()->m_deviceMIMOEngine = nullptr;
     m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = nullptr;
 
-    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleRx, deviceSetIndex, dspDeviceSourceEngine, nullptr, nullptr);
+    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleRx, deviceSetIndex, dspDeviceSourceEngine);
 
     m_deviceUIs.back()->m_deviceAPI = deviceAPI;
     m_mainCore->m_deviceSets.back()->m_deviceAPI = deviceAPI;
@@ -584,7 +584,7 @@ void MainWindow::sampleSinkAdd(Workspace *deviceWorkspace, Workspace *spectrumWo
     m_deviceUIs.back()->m_deviceMIMOEngine = nullptr;
     m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = nullptr;
 
-    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleTx, deviceSetIndex, nullptr, dspDeviceSinkEngine, nullptr);
+    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleTx, deviceSetIndex, nullptr);
 
     m_deviceUIs.back()->m_deviceAPI = deviceAPI;
     m_mainCore->m_deviceSets.back()->m_deviceAPI = deviceAPI;
@@ -802,7 +802,7 @@ void MainWindow::sampleMIMOAdd(Workspace *deviceWorkspace, Workspace *spectrumWo
     m_deviceUIs.back()->m_deviceMIMOEngine = dspDeviceMIMOEngine;
     m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = dspDeviceMIMOEngine;
 
-    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamMIMO, deviceSetIndex, nullptr, nullptr, dspDeviceMIMOEngine);
+    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamMIMO, deviceSetIndex, nullptr);
 
     m_deviceUIs.back()->m_deviceAPI = deviceAPI;
     m_mainCore->m_deviceSets.back()->m_deviceAPI = deviceAPI;
@@ -1956,11 +1956,11 @@ bool MainWindow::handleMessage(const Message& cmd)
     }
     else if (MainCore::MsgAddFeature::match(cmd))
     {
-        MainCore::MsgAddFeature& notif = (MainCore::MsgAddFeature&) cmd;
+        //MainCore::MsgAddFeature& notif = (MainCore::MsgAddFeature&) cmd;
 
-        if (m_workspaces.size() > 0) {
-            featureAddClicked(m_workspaces[0], notif.getFeatureRegistrationIndex());
-        }
+        //if (m_workspaces.size() > 0) {
+        //    featureAddClicked(m_workspaces[0], notif.getFeatureRegistrationIndex());
+        //}
 
         return true;
     }
@@ -2084,26 +2084,26 @@ void MainWindow::addWorkspace()
         [=](Workspace *inWorkspace, int deviceIndex) { this->sampleSourceAdd(inWorkspace, inWorkspace, deviceIndex); }
     );
 
-    QObject::connect(
-        m_workspaces.back(),
-        &Workspace::addTxDevice,
-        this,
-        [=](Workspace *inWorkspace, int deviceIndex) { this->sampleSinkAdd(inWorkspace, inWorkspace, deviceIndex); }
-    );
+    //QObject::connect(
+    //    m_workspaces.back(),
+    //    &Workspace::addTxDevice,
+    //    this,
+    //    [=](Workspace *inWorkspace, int deviceIndex) { this->sampleSinkAdd(inWorkspace, inWorkspace, deviceIndex); }
+    //);
 
-    QObject::connect(
-        m_workspaces.back(),
-        &Workspace::addMIMODevice,
-        this,
-        [=](Workspace *inWorkspace, int deviceIndex) { this->sampleMIMOAdd(inWorkspace, inWorkspace, deviceIndex); }
-    );
+    //QObject::connect(
+    //    m_workspaces.back(),
+    //    &Workspace::addMIMODevice,
+    //    this,
+    //    [=](Workspace *inWorkspace, int deviceIndex) { this->sampleMIMOAdd(inWorkspace, inWorkspace, deviceIndex); }
+    //);
 
-    QObject::connect(
-        m_workspaces.back(),
-        &Workspace::addFeature,
-        this,
-        &MainWindow::featureAddClicked
-    );
+    //QObject::connect(
+    //    m_workspaces.back(),
+    //    &Workspace::addFeature,
+    //    this,
+    //    &MainWindow::featureAddClicked
+    //);
 
     QObject::connect(
         m_workspaces.back(),
@@ -2624,110 +2624,6 @@ void MainWindow::channelDuplicateToDeviceSet(ChannelGUI *sourceChannelGUI, int d
                 destChannelGUI->deserialize(b);
             }
         }
-        else if (destDeviceUI->m_deviceSinkEngine) // sink device => Tx channels
-        {
-            PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
-            PluginInterface *pluginInterface = nullptr;
-
-            for (const auto& channelRegistration : *channelRegistrations)
-            {
-                if (channelRegistration.m_channelIdURI == sourceChannelAPI->getURI())
-                {
-                    pluginInterface = channelRegistration.m_plugin;
-                    break;
-                }
-            }
-
-            if (pluginInterface)
-            {
-                ChannelAPI *channelAPI;
-                BasebandSampleSource *txChannel;
-                pluginInterface->createTxChannel(destDeviceUI->m_deviceAPI, &txChannel, &channelAPI);
-                destChannelGUI = pluginInterface->createTxChannelGUI(destDeviceUI, txChannel);
-                destDeviceUI->registerTxChannelInstance(channelAPI, destChannelGUI);
-                destChannelGUI->setDeviceType(ChannelGUI::DeviceTx);
-                destChannelGUI->setIndex(channelAPI->getIndexInDeviceSet());
-                QByteArray b = sourceChannelGUI->serialize();
-                destChannelGUI->deserialize(b);
-            }
-        }
-        else if (destDeviceUI->m_deviceMIMOEngine) // MIMO device => Any type of channel is possible
-        {
-            PluginAPI::ChannelRegistrations *rxChannelRegistrations = m_pluginManager->getRxChannelRegistrations();
-            PluginAPI::ChannelRegistrations *txChannelRegistrations = m_pluginManager->getTxChannelRegistrations();
-            PluginAPI::ChannelRegistrations *mimoChannelRegistrations = m_pluginManager->getMIMOChannelRegistrations();
-            PluginInterface *pluginInterface = nullptr;
-
-            for (const auto& channelRegistration : *rxChannelRegistrations)
-            {
-                if (channelRegistration.m_channelIdURI == sourceChannelAPI->getURI())
-                {
-                    pluginInterface = channelRegistration.m_plugin;
-                    break;
-                }
-            }
-
-            if (pluginInterface) // Rx channel
-            {
-                ChannelAPI *channelAPI;
-                BasebandSampleSink *rxChannel;
-                pluginInterface->createRxChannel(destDeviceUI->m_deviceAPI, &rxChannel, &channelAPI);
-                destChannelGUI = pluginInterface->createRxChannelGUI(destDeviceUI, rxChannel);
-                destDeviceUI->registerRxChannelInstance(channelAPI, destChannelGUI);
-                destChannelGUI->setDeviceType(ChannelGUI::DeviceMIMO);
-                destChannelGUI->setIndex(channelAPI->getIndexInDeviceSet());
-                QByteArray b = sourceChannelGUI->serialize();
-                destChannelGUI->deserialize(b);
-            }
-            else
-            {
-                for (const auto& channelRegistration : *txChannelRegistrations)
-                {
-                    if (channelRegistration.m_channelIdURI == sourceChannelAPI->getURI())
-                    {
-                        pluginInterface = channelRegistration.m_plugin;
-                        break;
-                    }
-                }
-
-                if (pluginInterface) // Tx channel
-                {
-                    ChannelAPI *channelAPI;
-                    BasebandSampleSource *txChannel;
-                    pluginInterface->createTxChannel(destDeviceUI->m_deviceAPI, &txChannel, &channelAPI);
-                    destChannelGUI = pluginInterface->createTxChannelGUI(destDeviceUI, txChannel);
-                    destDeviceUI->registerTxChannelInstance(channelAPI, destChannelGUI);
-                    destChannelGUI->setDeviceType(ChannelGUI::DeviceMIMO);
-                    destChannelGUI->setIndex(channelAPI->getIndexInDeviceSet());
-                    QByteArray b = sourceChannelGUI->serialize();
-                    destChannelGUI->deserialize(b);
-                }
-                else
-                {
-                    for (const auto& channelRegistration : *mimoChannelRegistrations)
-                    {
-                        if (channelRegistration.m_channelIdURI == sourceChannelAPI->getURI())
-                        {
-                            pluginInterface = channelRegistration.m_plugin;
-                            break;
-                        }
-                    }
-
-                    if (pluginInterface)
-                    {
-                        ChannelAPI *channelAPI;
-                        MIMOChannel *mimoChannel;
-                        pluginInterface->createMIMOChannel(destDeviceUI->m_deviceAPI, &mimoChannel, &channelAPI);
-                        destChannelGUI = pluginInterface->createMIMOChannelGUI(destDeviceUI, mimoChannel);
-                        destDeviceUI->registerChannelInstance(channelAPI, destChannelGUI);
-                        destChannelGUI->setDeviceType(ChannelGUI::DeviceMIMO);
-                        destChannelGUI->setIndex(channelAPI->getIndexInDeviceSet());
-                        QByteArray b = sourceChannelGUI->serialize();
-                        destChannelGUI->deserialize(b);
-                    }
-                }
-            }
-        }
 
         DeviceAPI *destDeviceAPI = destDeviceUI->m_deviceAPI;
         int workspaceIndex = sourceChannelGUI->getWorkspaceIndex();
@@ -2785,62 +2681,62 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
             gui->setIndex(channelAPI->getIndexInDeviceSet());
             gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
         }
-        else if (deviceUI->m_deviceSinkEngine) // sink device => Tx channels
-        {
-            PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
-            PluginInterface *pluginInterface = (*channelRegistrations)[channelPluginIndex].m_plugin;
-            BasebandSampleSource *txChannel;
-            pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
-            gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
-            deviceUI->registerTxChannelInstance(channelAPI, gui);
-            gui->setDeviceType(ChannelGUI::DeviceTx);
-            gui->setIndex(channelAPI->getIndexInDeviceSet());
-            gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
-        }
-        else if (deviceUI->m_deviceMIMOEngine) // MIMO device => all possible channels. Depends on index range
-        {
-            int nbMIMOChannels = deviceUI->getNumberOfAvailableMIMOChannels();
-            int nbRxChannels = deviceUI->getNumberOfAvailableRxChannels();
-            int nbTxChannels = deviceUI->getNumberOfAvailableTxChannels();
-            qDebug("MainWindow::channelAddClicked: MIMO: dev %d : nbMIMO: %d nbRx: %d nbTx: %d selected: %d",
-                deviceSetIndex, nbMIMOChannels, nbRxChannels, nbTxChannels, channelPluginIndex);
+        //else if (deviceUI->m_deviceSinkEngine) // sink device => Tx channels
+        //{
+        //    PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
+        //    PluginInterface *pluginInterface = (*channelRegistrations)[channelPluginIndex].m_plugin;
+        //    BasebandSampleSource *txChannel;
+        //    pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
+        //    gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
+        //    deviceUI->registerTxChannelInstance(channelAPI, gui);
+        //    gui->setDeviceType(ChannelGUI::DeviceTx);
+        //    gui->setIndex(channelAPI->getIndexInDeviceSet());
+        //    gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
+        //}
+        //else if (deviceUI->m_deviceMIMOEngine) // MIMO device => all possible channels. Depends on index range
+        //{
+        //    int nbMIMOChannels = deviceUI->getNumberOfAvailableMIMOChannels();
+        //    int nbRxChannels = deviceUI->getNumberOfAvailableRxChannels();
+        //    int nbTxChannels = deviceUI->getNumberOfAvailableTxChannels();
+        //    qDebug("MainWindow::channelAddClicked: MIMO: dev %d : nbMIMO: %d nbRx: %d nbTx: %d selected: %d",
+        //        deviceSetIndex, nbMIMOChannels, nbRxChannels, nbTxChannels, channelPluginIndex);
 
-            if (channelPluginIndex < nbMIMOChannels)
-            {
-                PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getMIMOChannelRegistrations(); // Available channel plugins
-                PluginInterface *pluginInterface = (*channelRegistrations)[channelPluginIndex].m_plugin;
-                MIMOChannel *mimoChannel;
-                pluginInterface->createMIMOChannel(deviceUI->m_deviceAPI, &mimoChannel, &channelAPI);
-                gui = pluginInterface->createMIMOChannelGUI(deviceUI, mimoChannel);
-                deviceUI->registerChannelInstance(channelAPI, gui);
-                gui->setIndex(channelAPI->getIndexInDeviceSet());
-                gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
-            }
-            else if (channelPluginIndex < nbMIMOChannels + nbRxChannels) // Rx
-            {
-                PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getRxChannelRegistrations(); // Available channel plugins
-                PluginInterface *pluginInterface = (*channelRegistrations)[channelPluginIndex - nbMIMOChannels].m_plugin;
-                BasebandSampleSink *rxChannel;
-                pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, &channelAPI);
-                gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
-                deviceUI->registerRxChannelInstance(channelAPI, gui);
-                gui->setIndex(channelAPI->getIndexInDeviceSet());
-                gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
-            }
-            else if (channelPluginIndex < nbMIMOChannels + nbRxChannels + nbTxChannels)
-            {
-                PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
-                PluginInterface *pluginInterface = (*channelRegistrations)[channelPluginIndex - nbMIMOChannels - nbRxChannels].m_plugin;
-                BasebandSampleSource *txChannel;
-                pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
-                gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
-                deviceUI->registerTxChannelInstance(channelAPI, gui);
-                gui->setIndex(channelAPI->getIndexInDeviceSet());
-                gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
-            }
+        //    if (channelPluginIndex < nbMIMOChannels)
+        //    {
+        //        PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getMIMOChannelRegistrations(); // Available channel plugins
+        //        PluginInterface *pluginInterface = (*channelRegistrations)[channelPluginIndex].m_plugin;
+        //        MIMOChannel *mimoChannel;
+        //        pluginInterface->createMIMOChannel(deviceUI->m_deviceAPI, &mimoChannel, &channelAPI);
+        //        gui = pluginInterface->createMIMOChannelGUI(deviceUI, mimoChannel);
+        //        deviceUI->registerChannelInstance(channelAPI, gui);
+        //        gui->setIndex(channelAPI->getIndexInDeviceSet());
+        //        gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
+        //    }
+        //    else if (channelPluginIndex < nbMIMOChannels + nbRxChannels) // Rx
+        //    {
+        //        PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getRxChannelRegistrations(); // Available channel plugins
+        //        PluginInterface *pluginInterface = (*channelRegistrations)[channelPluginIndex - nbMIMOChannels].m_plugin;
+        //        BasebandSampleSink *rxChannel;
+        //        pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, &channelAPI);
+        //        gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
+        //        deviceUI->registerRxChannelInstance(channelAPI, gui);
+        //        gui->setIndex(channelAPI->getIndexInDeviceSet());
+        //        gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
+        //    }
+        //    else if (channelPluginIndex < nbMIMOChannels + nbRxChannels + nbTxChannels)
+        //    {
+        //        PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
+        //        PluginInterface *pluginInterface = (*channelRegistrations)[channelPluginIndex - nbMIMOChannels - nbRxChannels].m_plugin;
+        //        BasebandSampleSource *txChannel;
+        //        pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
+        //        gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
+        //        deviceUI->registerTxChannelInstance(channelAPI, gui);
+        //        gui->setIndex(channelAPI->getIndexInDeviceSet());
+        //        gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
+        //    }
 
-            gui->setDeviceType(ChannelGUI::DeviceMIMO);
-        }
+        //    gui->setDeviceType(ChannelGUI::DeviceMIMO);
+        //}
 
         if (gui)
         {

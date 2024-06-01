@@ -532,13 +532,13 @@ void FileSourceGUI::channelMarkerChangedByCursor()
 
 void FileSourceGUI::makeUIConnections()
 {
-    QObject::connect(ui->interpolationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FileSourceGUI::on_interpolationFactor_currentIndexChanged);
-    QObject::connect(ui->position, &QSlider::valueChanged, this, &FileSourceGUI::on_position_valueChanged);
-    QObject::connect(ui->gain, &QSlider::valueChanged, this, &FileSourceGUI::on_gain_valueChanged);
+    //QObject::connect(ui->interpolationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FileSourceGUI::on_interpolationFactor_currentIndexChanged);
+   // QObject::connect(ui->position, &QSlider::valueChanged, this, &FileSourceGUI::on_position_valueChanged);
+   // QObject::connect(ui->gain, &QSlider::valueChanged, this, &FileSourceGUI::on_gain_valueChanged);
     QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &FileSourceGUI::on_showFileDialog_clicked);
-    QObject::connect(ui->playLoop, &ButtonSwitch::toggled, this, &FileSourceGUI::on_playLoop_toggled);
+    //QObject::connect(ui->playLoop, &ButtonSwitch::toggled, this, &FileSourceGUI::on_playLoop_toggled);
     QObject::connect(ui->play, &ButtonSwitch::toggled, this, &FileSourceGUI::on_play_toggled);
-    QObject::connect(ui->navTime, &QSlider::valueChanged, this, &FileSourceGUI::on_navTime_valueChanged);
+   // QObject::connect(ui->navTime, &QSlider::valueChanged, this, &FileSourceGUI::on_navTime_valueChanged);
 }
 
 void FileSourceGUI::updateAbsoluteCenterFrequency()

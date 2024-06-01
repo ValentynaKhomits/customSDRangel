@@ -34,10 +34,7 @@
 DeviceAPI::DeviceAPI(
         StreamType streamType,
         int deviceTabIndex,
-        DSPDeviceSourceEngine *deviceSourceEngine,
-        DSPDeviceSinkEngine *deviceSinkEngine,
-        DSPDeviceMIMOEngine *deviceMIMOEngine
-) :
+        DSPDeviceSourceEngine *deviceSourceEngine) :
     m_streamType(streamType),
     m_deviceTabIndex(deviceTabIndex),
     m_deviceNbItems(1),
@@ -50,19 +47,19 @@ DeviceAPI::DeviceAPI(
     m_workspaceIndex(0),
     m_buddySharedPtr(nullptr),
     m_isBuddyLeader(false),
-    m_deviceSourceEngine(deviceSourceEngine),
-    m_deviceSinkEngine(deviceSinkEngine),
-    m_deviceMIMOEngine(deviceMIMOEngine)
+    m_deviceSourceEngine(deviceSourceEngine)
+    //m_deviceSinkEngine(deviceSinkEngine),
+    //m_deviceMIMOEngine(deviceMIMOEngine)
 {
     if (m_deviceSourceEngine) {
         QObject::connect(m_deviceSourceEngine, &DSPDeviceSourceEngine::stateChanged, this, &DeviceAPI::engineStateChanged);
     }
-    if (m_deviceSinkEngine) {
-        QObject::connect(m_deviceSinkEngine, &DSPDeviceSinkEngine::stateChanged, this, &DeviceAPI::engineStateChanged);
-    }
-    if (m_deviceMIMOEngine) {
-        QObject::connect(m_deviceMIMOEngine, &DSPDeviceMIMOEngine::stateChanged, this, &DeviceAPI::engineStateChanged);
-    }
+    //if (m_deviceSinkEngine) {
+    //    QObject::connect(m_deviceSinkEngine, &DSPDeviceSinkEngine::stateChanged, this, &DeviceAPI::engineStateChanged);
+    //}
+    //if (m_deviceMIMOEngine) {
+    //    QObject::connect(m_deviceMIMOEngine, &DSPDeviceMIMOEngine::stateChanged, this, &DeviceAPI::engineStateChanged);
+    //}
 }
 
 DeviceAPI::~DeviceAPI()
