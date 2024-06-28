@@ -379,6 +379,7 @@ void MainWindow::sampleSourceAdd(Workspace *deviceWorkspace, Workspace *spectrum
     sampleSourceCreate(deviceSetIndex, deviceIndex, m_deviceUIs.back());
     m_deviceUIs.back()->m_deviceGUI->setWorkspaceIndex(deviceWorkspace->getIndex());
     m_deviceUIs.back()->m_mainSpectrumGUI->setWorkspaceIndex(spectrumWorkspace->getIndex());
+    m_deviceUIs.back()->m_mainSpectrumGUI->setVisible(false);
     MainSpectrumGUI *mainSpectrumGUI = m_deviceUIs.back()->m_mainSpectrumGUI;
 
     QObject::connect(

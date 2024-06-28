@@ -29,19 +29,19 @@ HackRFInputSettings::HackRFInputSettings()
 
 void HackRFInputSettings::resetToDefaults()
 {
-	m_centerFrequency = 435000 * 1000;
+	m_centerFrequency = (quint64)(5658000) * 1000;
 	m_LOppmTenths = 0;
 	m_biasT = false;
 	m_log2Decim = 0;
 	m_fcPos = FC_POS_CENTER;
-	m_lnaExt = false;
+	m_lnaExt = true;
 	m_lnaGain = 16;
-	m_bandwidth = 1750000;
+	m_bandwidth = 20000000;
 	m_vgaGain = 16;
-	m_dcBlock = false;
+	m_dcBlock = true;
 	m_iqCorrection = false;
 	m_autoBBF = true;
-	m_devSampleRate = 2400000;
+	m_devSampleRate = 20000000;
     m_transverterMode = false;
 	m_transverterDeltaFrequency = 0;
     m_iqOrder = true;

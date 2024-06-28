@@ -34,22 +34,22 @@ void ATVDemodSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
     m_bfoFrequency = 0.0f;
-    m_atvModulation = ATV_FM1;
+    m_atvModulation = ATV_FM2;
     m_fmDeviation = 0.5f;
     m_amScalingFactor = 100;
     m_amOffsetFactor = 0;
     m_fftFiltering = false;
     m_fftOppBandwidth = 0;
     m_fftBandwidth = 6000;
-    m_nbLines = 525;
-    m_fps = 30;
-    m_atvStd = ATVStdPAL525;
+    m_nbLines = 625;
+    m_fps = 25;
+    m_atvStd = ATVStdPAL625;
     m_hSync = true;
     m_vSync = true;
     m_invertVideo = false;
     m_halfFrames = true; // m_fltRatioOfRowsToDisplay = 1.0
-    m_levelSynchroTop = 0.15f;
-    m_levelBlack = 0.3f;
+    m_levelSynchroTop = 0.04f;
+    m_levelBlack = 0.25f;
     m_rgbColor = QColor(255, 255, 255).rgb();
     m_title = "ATV Demodulator";
     m_udpAddress = "127.0.0.1";

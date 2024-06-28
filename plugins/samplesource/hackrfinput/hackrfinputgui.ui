@@ -37,9 +37,6 @@
   <property name="windowTitle">
    <string>HackRF</string>
   </property>
-  <property name="toolTip">
-   <string>Transverter frequency translation dialog</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
     <number>3</number>
@@ -180,6 +177,9 @@
        <property name="toolTip">
         <string>LO correction ppm</string>
        </property>
+       <property name="visible">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>LO ppm</string>
        </property>
@@ -189,6 +189,9 @@
       <widget class="QSlider" name="LOppm">
        <property name="toolTip">
         <string>Local Oscillator ppm correction</string>
+       </property>
+	   <property name="visible">
+        <bool>false</bool>
        </property>
        <property name="minimum">
         <number>-300</number>
@@ -209,6 +212,9 @@
        <property name="text">
         <string>0.0</string>
        </property>
+	   <property name="visible">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
     </layout>
@@ -226,12 +232,18 @@
        <property name="text">
         <string>Auto</string>
        </property>
+       <property name="visible">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item row="0" column="1">
       <widget class="ButtonSwitch" name="dcOffset">
        <property name="toolTip">
         <string>DC Offset auto correction</string>
+       </property>
+       <property name="visible">
+        <bool>false</bool>
        </property>
        <property name="text">
         <string>DC</string>
@@ -243,6 +255,9 @@
        <property name="toolTip">
         <string>IQ Imbalance auto correction</string>
        </property>
+       <property name="visible">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>IQ</string>
        </property>
@@ -252,6 +267,9 @@
       <widget class="ButtonSwitch" name="autoBBF">
        <property name="toolTip">
         <string>Bandpass Filter auto select</string>
+       </property>
+       <property name="visible">
+        <bool>false</bool>
        </property>
        <property name="text">
         <string>BBF</string>
@@ -276,6 +294,9 @@
        <property name="toolTip">
         <string>Activate antenna bias tee</string>
        </property>
+       <property name="visible">
+        <bool>false</bool>
+       </property>
        <property name="layoutDirection">
         <enum>Qt::RightToLeft</enum>
        </property>
@@ -288,6 +309,9 @@
       <widget class="QCheckBox" name="lnaExt">
        <property name="toolTip">
         <string>Extra LNA +14dB</string>
+       </property>
+       <property name="visible">
+        <bool>false</bool>
        </property>
        <property name="layoutDirection">
         <enum>Qt::RightToLeft</enum>
@@ -305,6 +329,9 @@
          <height>24</height>
         </size>
        </property>
+	   <property name="visible">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>X</string>
        </property>
@@ -316,6 +343,9 @@
     <widget class="Line" name="line_freq">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
+     </property>
+	 <property name="visible">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
@@ -337,6 +367,9 @@
          <width>24</width>
          <height>16777215</height>
         </size>
+       </property>
+	   <property name="visible">
+        <bool>false</bool>
        </property>
        <property name="toolTip">
         <string>Toggle between device to host (SR) and base band (BB) sample rate input</string>
@@ -366,6 +399,9 @@
          <height>16</height>
         </size>
        </property>
+	   <property name="visible">
+        <bool>false</bool>
+       </property>
        <property name="font">
         <font>
          <family>Liberation Mono</family>
@@ -384,6 +420,9 @@
       <widget class="QLabel" name="rateUnits">
        <property name="text">
         <string>S/s</string>
+       </property>
+	   <property name="visible">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -405,6 +444,9 @@
        <property name="text">
         <string>Dec.</string>
        </property>
+	   <property name="visible">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -417,6 +459,9 @@
        </property>
        <property name="toolTip">
         <string>Decimation factor</string>
+       </property>
+	   <property name="visible">
+        <bool>false</bool>
        </property>
        <property name="currentIndex">
         <number>3</number>
@@ -476,12 +521,18 @@
        <property name="toolTip">
         <string>RF bandpass filter</string>
        </property>
+	   <property name="visible">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label_fcPos">
        <property name="text">
         <string>Fc pos</string>
+       </property>
+	   <property name="visible">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -492,6 +543,9 @@
          <width>55</width>
          <height>16777215</height>
         </size>
+       </property>
+	   <property name="visible">
+        <bool>false</bool>
        </property>
        <property name="toolTip">
         <string>Relative position of device center frequency</string>
@@ -530,6 +584,9 @@
       <widget class="QLabel" name="bbFiltLabel">
        <property name="text">
         <string>BBF</string>
+       </property>
+	   <property name="visible">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
