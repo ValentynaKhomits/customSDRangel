@@ -305,6 +305,10 @@ elseif(APPLE)
   configure_file("${CMAKE_SOURCE_DIR}/cmake/cpack/MacOSXBundleInfo.plist.in"
     "${CMAKE_BINARY_DIR}/Info.plist" @ONLY)
 elseif (WIN32)
+  if (MSVC)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zi")
+  endif()
   # check compiler version
   message(STATUS "MSVC_VERSION is ${MSVC_VERSION}")
   if(MSVC_VERSION GREATER_EQUAL 1930 AND MSVC_VERSION LESS 1940)

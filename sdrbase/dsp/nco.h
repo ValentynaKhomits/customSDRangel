@@ -41,6 +41,7 @@ public:
 
 	void setFreq(Real freq, Real sampleRate);
 	void setPhase(int phase) { m_phase = phase; }
+	int getPhase(void) { return m_phase; }
 
 	void nextPhase()        //!< Increment phase
 	{
@@ -49,6 +50,10 @@ public:
 			m_phase -= TableSize;
 		while(m_phase < 0)
 			m_phase += TableSize;
+	}
+
+	int convertToPhase(Real phi) {
+		return (int)((Real)((phi) / (2.0f * M_PI)) * (Real)TableSize);
 	}
 
 	Real next();            //!< Return next real sample

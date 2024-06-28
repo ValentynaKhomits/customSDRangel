@@ -652,5 +652,6 @@ void ATVDemodGUI::makeUIConnections()
 
 void ATVDemodGUI::updateAbsoluteCenterFrequency()
 {
-    setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
+    //setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
+    setStatusFrequency(m_deviceCenterFrequency);
 }

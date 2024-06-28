@@ -21,17 +21,25 @@
 
 #include <stdio.h>
 #include <complex.h>
-
+#include "dsp/misc.h"
+#include "dsp/phasediscri.h"
 #include "dsp/scopevis.h"
 #include "atvdemodsink.h"
 
 const int ATVDemodSink::m_ssbFftLen = 1024;
+#define RAD_TO_DEG   57.29577951308232f
+#define AV_PAL_CHROMA_SUBCARRIER_FREQ_F  4433618.75f
+#define AV_PAL_CHROMA_SUBCARRIER_BW      1300000.0f
+
+#define AV_NTSC_CHROMA_SUBCARRIER_FREQ_F 3575611.49f
+#define AV_NTSC_CHROMA_SUBCARRIER_BW     1600000.0f
+
 
 ATVDemodSink::ATVDemodSink() :
     m_channelSampleRate(1000000),
     m_channelFrequencyOffset(0),
     m_samplesPerLine(100),
-	m_samplesPerLineFrac(0.0f),
+    m_samplesPerLineFrac(0.0f),
     m_videoTabIndex(0),
     m_scopeSink(nullptr),
     m_registeredTVScreen(nullptr),
@@ -45,13 +53,14 @@ ATVDemodSink::ATVDemodSink() :
     m_ampDelta(2.0f),
     m_amSampleIndex(0),
     m_sampleOffset(0),
-	m_sampleOffsetFrac(0.0f),
+    m_sampleOffsetFrac(0.0f),
     m_sampleOffsetDetected(0),
-    m_lineIndex(0),
-	m_hSyncShift(0.0f),
+    m_lineIndex(1),
+    m_hSyncShift(0.0f),
     m_hSyncErrorCount(0),
     m_ampAverage(4800),
-    m_bfoPLL(200/1000000, 100/1000000, 0.01),
+    m_nco_col(),
+    m_bfoPLL(200 / 1000000, 100 / 1000000, 0.01),
     m_bfoFilter(200.0, 1000000.0, 0.9),
     m_DSBFilter(nullptr),
     m_DSBFilterBuffer(nullptr),
@@ -90,10 +99,6 @@ void ATVDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
     {
         Complex c(it->real(), it->imag());
 
-        if (m_settings.m_inputFrequencyOffset != 0) {
-            c *= m_nco.nextIQ();
-        }
-
         demod(c);
     }
 
@@ -106,7 +111,7 @@ void ATVDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
     }
 }
 
-void ATVDemodSink::demod(Complex& c)
+float ATVDemodSink::getVideoSample(Complex& c, ATVDemodSettings::ATVModulation modulation)
 {
     float sampleNormI;
     float sampleNormQ;
@@ -119,7 +124,7 @@ void ATVDemodSink::demod(Complex& c)
     if (m_settings.m_fftFiltering)
     {
         int n_out;
-        Complex *filtered;
+        Complex* filtered;
 
         n_out = m_DSBFilter->runAsym(c, &filtered, m_settings.m_atvModulation != ATVDemodSettings::ATV_LSB); // all usb except explicitely lsb
 
@@ -143,11 +148,11 @@ void ATVDemodSink::demod(Complex& c)
     if ((m_settings.m_atvModulation == ATVDemodSettings::ATV_FM1) || (m_settings.m_atvModulation == ATVDemodSettings::ATV_FM2))
     {
         //Amplitude FM
-        magSq = fltI*fltI + fltQ*fltQ;
+        magSq = fltI * fltI + fltQ * fltQ;
         m_magSqAverage(magSq);
         sampleNorm = sqrt(magSq);
-        sampleNormI = fltI/sampleNorm;
-        sampleNormQ = fltQ/sampleNorm;
+        sampleNormI = fltI / sampleNorm;
+        sampleNormQ = fltQ / sampleNorm;
 
         //-2 > 2 : 0 -> 1 volt
         //0->0.3 synchro  0.3->1 image
@@ -155,8 +160,8 @@ void ATVDemodSink::demod(Complex& c)
         if (m_settings.m_atvModulation == ATVDemodSettings::ATV_FM1)
         {
             //YDiff Cd
-            sample = m_fltBufferI[0]*(sampleNormQ - m_fltBufferQ[1]);
-            sample -= m_fltBufferQ[0]*(sampleNormI - m_fltBufferI[1]);
+            sample = m_fltBufferI[0] * (sampleNormQ - m_fltBufferQ[1]);
+            sample -= m_fltBufferQ[0] * (sampleNormI - m_fltBufferI[1]);
 
             sample += 2.0f;
             sample /= 4.0f;
@@ -165,8 +170,8 @@ void ATVDemodSink::demod(Complex& c)
         else
         {
             //YDiff Folded
-            sample =  m_fltBufferI[2]*((m_fltBufferQ[5]-sampleNormQ)/16.0f + m_fltBufferQ[1] - m_fltBufferQ[3]);
-            sample -= m_fltBufferQ[2]*((m_fltBufferI[5]-sampleNormI)/16.0f + m_fltBufferI[1] - m_fltBufferI[3]);
+            sample = m_fltBufferI[2] * ((m_fltBufferQ[5] - sampleNormQ) / 16.0f + m_fltBufferQ[1] - m_fltBufferQ[3]);
+            sample -= m_fltBufferQ[2] * ((m_fltBufferI[5] - sampleNormI) / 16.0f + m_fltBufferI[1] - m_fltBufferI[3]);
 
             sample += 2.125f;
             sample /= 4.25f;
@@ -198,7 +203,7 @@ void ATVDemodSink::demod(Complex& c)
     else if (m_settings.m_atvModulation == ATVDemodSettings::ATV_AM)
     {
         //Amplitude AM
-        magSq = fltI*fltI + fltQ*fltQ;
+        magSq = fltI * fltI + fltQ * fltQ;
         m_magSqAverage(magSq);
         sampleNorm = sqrt(magSq);
         float sampleRaw = sampleNorm / SDR_RX_SCALEF;
@@ -207,7 +212,7 @@ void ATVDemodSink::demod(Complex& c)
     }
     else if ((m_settings.m_atvModulation == ATVDemodSettings::ATV_USB) || (m_settings.m_atvModulation == ATVDemodSettings::ATV_LSB))
     {
-        magSq = fltI*fltI + fltQ*fltQ;
+        magSq = fltI * fltI + fltQ * fltQ;
         m_magSqAverage(magSq);
         sampleNorm = sqrt(magSq);
 
@@ -235,7 +240,7 @@ void ATVDemodSink::demod(Complex& c)
     }
     else
     {
-        magSq = fltI*fltI + fltQ*fltQ;
+        magSq = fltI * fltI + fltQ * fltQ;
         m_magSqAverage(magSq);
         sampleNorm = sqrt(magSq);
         sample = 0.0f;
@@ -294,22 +299,52 @@ void ATVDemodSink::demod(Complex& c)
     // 0.0 -> 1.0
     sample = (sample < 0.0f) ? 0.0f : (sample > 1.0f) ? 1.0f : sample;
 
+    return sample;
+}
+
+void ATVDemodSink::demod(Complex& c)
+{
+    float luminance_sig;
+    float chrominance_sig;
+    int aVideo;
+    int r_col = 0, g_col = 0, b_col = 0;
+
+    // Get Luminance signale (B/W)
+    luminance_sig = getVideoSample(c, m_settings.m_atvModulation);
+
+    // Filter out luma part, left only chroma
+    chrominance_sig = m_bandpass_sig.filter(2.0f * luminance_sig);
+
+    Complex ref = m_nco_col.nextIQ();
+
+    // Get color
+    float mixQ = m_lowpass_q_col.filter(chrominance_sig * (2.0f * ref.real()));
+    float mixI = m_lowpass_i_col.filter(chrominance_sig * (2.0f * ref.imag()));
+
+    float colU = mixI;
+    float colV = m_odd_line? mixQ : -mixQ;
+
     if ((m_videoTabIndex == 1) && (m_scopeSink != 0)) { // feed scope buffer only if scope is present and visible
-        m_scopeSampleBuffer.push_back(Sample(sample * (SDR_RX_SCALEF - 1.0f), 0.0f));
+        m_scopeSampleBuffer.push_back(Sample(chrominance_sig * (SDR_RX_SCALEF - 1.0f), 0.0f));
     }
 
     //********** gray level **********
     // -0.3 -> 0.7 / 0.7
-    sampleVideo = (int) ((sample - m_settings.m_levelBlack) * m_sampleRangeCorrection);
+    float colY = (luminance_sig - m_settings.m_levelBlack);
 
-    // 0 -> 255
-    sampleVideo = (sampleVideo < 0) ? 0 : (sampleVideo > 255) ? 255 : sampleVideo;
+    // Convert YUV to RGB
+    r_col = (int)(std::min(std::max(colY + 1.403f * colV, 0.0f), 1.0f) * 255.0f);
+    g_col = (int)(std::min(std::max(colY - 0.344f * colU - 0.714f * colV, 0.0f), 1.0f) * 255.0f);
+    b_col = (int)(std::min(std::max(colY + 1.770f * colU, 0.0f), 1.0f) * 255.0f);
+
+    // RGB888
+    aVideo = (int)b_col << 16 | (int)g_col << 8 | (int)r_col;
 
     //********** process video sample **********
 
     if (m_registeredTVScreen) // can process only if the screen is available (set via the GUI)
     {
-        processSample(sample, sampleVideo);
+        processSample(luminance_sig, aVideo, chrominance_sig);
     }
 }
 
@@ -349,6 +384,8 @@ void ATVDemodSink::applyStandard(int sampleRate, ATVDemodSettings::ATVStd atvStd
         break;
     case ATVDemodSettings::ATVStdPAL525: // Follows PAL-M standard
         // what is left in a 64/1.008 us line for the image
+        m_chroma_subcarrier_freq = 3575611.49f;
+        m_chroma_subcarrier_bw   = 1600000.0f;
         m_interleaved        = true;
         m_numberOfVSyncLines = 4;
         m_numberOfBlackLines = 45;
@@ -358,6 +395,8 @@ void ATVDemodSink::applyStandard(int sampleRate, ATVDemodSettings::ATVStd atvStd
     case ATVDemodSettings::ATVStdPAL625: // Follows PAL-B/G/H standard
     default:
         // what is left in a 64 us line for the image
+        m_chroma_subcarrier_freq = 4433618.75f;
+        m_chroma_subcarrier_bw   = 1300000.0f;
         m_interleaved        = true;
         m_numberOfVSyncLines = 3;
         m_numberOfBlackLines = 49;
@@ -369,9 +408,10 @@ void ATVDemodSink::applyStandard(int sampleRate, ATVDemodSettings::ATVStd atvStd
 
     // Rec. ITU-R BT.1700
     // Table 2. Details of line synchronizing signals
-    m_numberSamplesPerLineSignals = (int)(lineDuration * sampleRate * 12.0  / 64.0); // "a", Line-blanking interval
-    m_numberSamplesPerHSync       = (int)(lineDuration * sampleRate * 10.5  / 64.0); // "b", Interval between time datum and back edge of line-blanking pulse
-    m_numberSamplesPerHTop        = (int)(lineDuration * sampleRate *  4.7  / 64.0); // "d", Duration of synchronizing pulse
+    m_numberSamplesPerLineSignals = (int)(lineDuration * sampleRate * 12.0 / 64.0); // "a", Line-blanking interval
+    m_numberSamplesPerHSync       = (int)(lineDuration * sampleRate * 10.5 / 64.0); // "b", Interval between time datum and back edge of line-blanking pulse
+    m_numberSamplesPerHTop        = (int)(lineDuration * sampleRate *  4.7 / 64.0); // "d", Duration of synchronizing pulse
+    m_numberSamplesPerBurst       = (int)(lineDuration * sampleRate *  2.5 / 64.0); // "h", Duration of sub-carrier burst
 
     // Table 3. Details of field synchronizing signals
     float hl = 32.0f; // half of the line
@@ -415,12 +455,6 @@ void ATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
         return;
     }
 
-    if ((channelFrequencyOffset != m_channelFrequencyOffset) ||
-        (channelSampleRate != m_channelSampleRate) || force)
-    {
-        m_nco.setFreq(-channelFrequencyOffset, channelSampleRate);
-    }
-
     if ((channelSampleRate != m_channelSampleRate) || force)
     {
         unsigned int samplesPerLineNom;
@@ -449,6 +483,16 @@ void ATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
     }
 
     applyStandard(m_channelSampleRate, m_settings.m_atvStd, ATVDemodSettings::getNominalLineTime(m_settings.m_nbLines, m_settings.m_fps));
+
+    m_nco_col.setFreq(-m_chroma_subcarrier_freq, channelSampleRate);
+    m_nco_col.setPhase(m_nco_col.convertToPhase(135.0f/ RAD_TO_DEG));
+
+    m_bandpass_sig.create(21, m_channelSampleRate,
+        m_chroma_subcarrier_freq - (m_chroma_subcarrier_bw / 2),
+        m_chroma_subcarrier_freq + (m_chroma_subcarrier_bw / 2));
+
+    m_lowpass_i_col.create(21, m_channelSampleRate, 2000000.0f);
+    m_lowpass_q_col.create(21, m_channelSampleRate, 2000000.0f);
 
     if (m_registeredTVScreen)
     {

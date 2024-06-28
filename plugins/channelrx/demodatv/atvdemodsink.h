@@ -25,26 +25,40 @@
 
 #include "dsp/channelsamplesink.h"
 #include "dsp/nco.h"
+#include "dsp/ncof.h"
 #include "dsp/fftfilt.h"
 #include "dsp/phaselock.h"
 #include "dsp/recursivefilters.h"
 #include "dsp/phasediscri.h"
 #include "util/movingaverage.h"
 #include "gui/tvscreenanalog.h"
+#include "dsp/firfilter.h"
+#include "dsp/phaselockcomplex.h"
 
 #include "atvdemodsettings.h"
+
+const std::vector<double> hilbert_coeffs = {
+    // Insert the coefficients generated from the Python script here
+    -0.0033, -0.0027, -0.0012,  0.0016,  0.0056,  0.0108,  0.0170,  0.0240,
+     0.0313,  0.0385,  0.0452,  0.0508,  0.0547,  0.0563,  0.0550,  0.0506,
+     0.0427,  0.0312,  0.0160, -0.0023, -0.0226, -0.0434, -0.0632, -0.0807,
+    -0.0947, -0.1042, -0.1081, -0.1057, -0.0963, -0.0796, -0.0555, -0.0245,
+     0.0131,  0.0566,  0.1042,  0.1541,  0.2039,  0.2510,  0.2925,  0.3253,
+     0.3461
+};
+
 
 class ScopeVis;
 
 class ATVDemodSink : public ChannelSampleSink {
 public:
     ATVDemodSink();
-	~ATVDemodSink();
+    ~ATVDemodSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
-  	void setScopeSink(ScopeVis* scopeSink) { m_scopeSink = scopeSink; }
-    void setTVScreen(TVScreenAnalog *tvScreen) //!< set by the GUI
+    void setScopeSink(ScopeVis* scopeSink) { m_scopeSink = scopeSink; }
+    void setTVScreen(TVScreenAnalog* tvScreen) //!< set by the GUI
     {
         m_registeredTVScreen = tvScreen;
         m_tvScreenBuffer = m_registeredTVScreen->getBackBuffer();
@@ -55,6 +69,9 @@ public:
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void applySettings(const ATVDemodSettings& settings, bool force = false);
+
+    float getVideoSample(Complex& c, ATVDemodSettings::ATVModulation modulation);
+    float getColorSample(Complex& c, ATVDemodSettings::ATVModulation modulation, float amplitude);
 
 private:
     struct ATVConfigPrivate
@@ -87,8 +104,8 @@ private:
             }
             else
             {
-                m_m1 = m0 + m_m1 - (m_m1>>m_log2Alpha);
-                return m_m1>>m_log2Alpha;
+                m_m1 = m0 + m_m1 - (m_m1 >> m_log2Alpha);
+                return m_m1 >> m_log2Alpha;
             }
         }
 
@@ -96,6 +113,31 @@ private:
         int m_log2Alpha;
         int m_m1;
         bool m_start;
+    };
+
+    class HilbertTransform {
+    public:
+        HilbertTransform() : buffer(hilbert_coeffs.size(), 0.0) {}
+
+        Complex processSample(double sample) {
+            // Shift buffer
+            for (size_t i = buffer.size() - 1; i > 0; --i) {
+                buffer[i] = buffer[i - 1];
+            }
+            buffer[0] = sample;
+
+            // Apply Hilbert transform filter to get the imaginary part
+            double imag_part = 0.0;
+            for (size_t i = 0; i < hilbert_coeffs.size(); ++i) {
+                imag_part += buffer[i] * hilbert_coeffs[i];
+            }
+
+            // The real part is the current sample
+            return Complex(sample, imag_part);
+        }
+
+    private:
+        std::vector<double> buffer;
     };
 
     int m_channelSampleRate;
@@ -128,10 +170,14 @@ private:
     int m_fieldDetectThreshold1;
     int m_fieldDetectThreshold2;
 
+    bool m_odd_line;
+    float m_chroma_subcarrier_freq;    //!< color (chroma) subcarrier frequency
+    float m_chroma_subcarrier_bw;      //!< color (chroma) subcarrier bandwidth
     int m_numberOfVSyncLines;
     int m_numberSamplesPerLineSignals; //!< number of samples in the non image part of the line (signals = front porch + pulse + back porch)
     int m_numberSamplesPerHSync;       //!< number of samples per horizontal synchronization pattern (pulse + back porch)
     int m_numberSamplesHSyncCrop;      //!< number of samples to crop from start of horizontal synchronization
+    int m_numberSamplesPerBurst;       //!< number of smaples to get burst phase // 50 samples
     bool m_interleaved;                //!< interleaved image
 
     //*************** PROCESSING  ***************
@@ -157,6 +203,7 @@ private:
     int m_sampleOffset;         // assumed (averaged) sample offset from the start of horizontal sync pulse
 	float m_sampleOffsetFrac;   // sample offset, fractional part
     int m_sampleOffsetDetected; // detected sample offset from the start of horizontal sync pulse
+    int m_sampleOffsetColorBurst; // detect color burst sample
     int m_lineIndex;
 
 	float m_hSyncShift;
@@ -174,7 +221,11 @@ private:
     MovingAverageUtil<double, double, 32> m_magSqAverage;
     MovingAverageUtilVar<double, double> m_ampAverage;
 
-    NCO m_nco;
+    HilbertTransform m_hilbert;
+    NCOF m_nco_col;
+    Bandpass<Real> m_bandpass_sig;
+    Lowpass<Real> m_lowpass_i_col;
+    Lowpass<Real> m_lowpass_q_col;
     SimplePhaseLock m_bfoPLL;
     SecondOrderRecursiveFilter m_bfoFilter;
 
@@ -190,10 +241,10 @@ private:
     void demod(Complex& c);
     void applyStandard(int sampleRate, ATVDemodSettings::ATVStd atvStd, float lineDuration);
 
-    inline void processSample(float& sample, int& sampleVideo)
+    inline void processSample(float& sample, int& sampleVideo, float& chroma)
     {
         // Filling pixel on the current line - reference index 0 at start of sync pulse
-		m_tvScreenBuffer->setSampleValue(m_sampleOffset - m_numberSamplesPerHSync, sampleVideo);
+        m_tvScreenBuffer->setSampleValue(m_sampleOffset - m_numberSamplesPerHSync, sampleVideo);
 
         if (m_settings.m_hSync)
         {
@@ -206,9 +257,9 @@ private:
                     (sample - m_settings.m_levelSynchroTop) / (prevSample - sample);
                 float hSyncShift = -m_sampleOffset - m_sampleOffsetFrac - sampleOffsetDetectedFrac;
                 if (hSyncShift > m_samplesPerLine / 2)
-					hSyncShift -= m_samplesPerLine;
+                    hSyncShift -= m_samplesPerLine;
                 else if (hSyncShift < -m_samplesPerLine / 2)
-					hSyncShift += m_samplesPerLine;
+                    hSyncShift += m_samplesPerLine;
 
                 if (fabs(hSyncShift) > m_numberSamplesPerHTop)
                 {
@@ -216,22 +267,45 @@ private:
                     if (m_hSyncErrorCount >= 4)
                     {
                         // Fast sync: shift is too large, needs to be fixed ASAP
-						m_hSyncShift = hSyncShift;
+                        m_hSyncShift = hSyncShift;
                         m_hSyncErrorCount = 0;
                     }
                 }
                 else
                 {
-					// Slow sync: slight adjustment is needed
-					m_hSyncShift = hSyncShift * 0.2f;
+                    // Slow sync: slight adjustment is needed
+                    m_hSyncShift = hSyncShift * 0.2f;
                     m_hSyncErrorCount = 0;
                 }
-				m_sampleOffsetDetected = 0;
+                m_sampleOffsetDetected = 0;
             }
             else
-				m_sampleOffsetDetected++;
+            {
+                // sync with color burst
+                if ((m_sampleOffsetDetected > 115) && (m_sampleOffsetDetected < 115 + (m_numberSamplesPerBurst - 20))){
+                    Complex ref = m_hilbert.processSample(chroma);
+                    Complex col = m_nco_col.getIQ();
+                    float col_phase = std::arg(col);
+                    float ref_phase = std::arg(ref);
+
+                    if ((ref_phase - col_phase) > 0.16f){
+                        m_nco_col.setPhase(m_nco_col.convertToPhase(ref_phase -= ((ref_phase - col_phase) * 0.16f)));
+                    }
+                    else if ((ref_phase - col_phase) < -0.16f){
+                        m_nco_col.setPhase(m_nco_col.convertToPhase(ref_phase += ((ref_phase - col_phase) * 0.16f)));
+                    }
+
+                    m_sampleOffsetColorBurst++;
+                }
+                else{
+                    m_sampleOffsetColorBurst = 0;
+                }
+
+                m_sampleOffsetDetected++;
+            }
         }
-		m_sampleOffset++;
+
+        m_sampleOffset++;
 
         if (m_settings.m_vSync)
         {

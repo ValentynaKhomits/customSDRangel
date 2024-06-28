@@ -47,8 +47,8 @@ void ATVDemodSettings::resetToDefaults()
     m_hSync = true;
     m_vSync = true;
     m_invertVideo = false;
-    m_halfFrames = true; // m_fltRatioOfRowsToDisplay = 1.0
-    m_levelSynchroTop = 0.04f;
+    m_halfFrames = false; // m_fltRatioOfRowsToDisplay = 1.0
+    m_levelSynchroTop = 0.045f;
     m_levelBlack = 0.25f;
     m_rgbColor = QColor(255, 255, 255).rgb();
     m_title = "ATV Demodulator";
