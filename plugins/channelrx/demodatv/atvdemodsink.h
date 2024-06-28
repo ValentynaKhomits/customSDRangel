@@ -71,7 +71,6 @@ public:
     void applySettings(const ATVDemodSettings& settings, bool force = false);
 
     float getVideoSample(Complex& c, ATVDemodSettings::ATVModulation modulation);
-    float getColorSample(Complex& c, ATVDemodSettings::ATVModulation modulation, float amplitude);
 
 private:
     struct ATVConfigPrivate
@@ -170,7 +169,7 @@ private:
     int m_fieldDetectThreshold1;
     int m_fieldDetectThreshold2;
 
-    bool m_odd_line;
+    bool m_even_odd_line;
     float m_chroma_subcarrier_freq;    //!< color (chroma) subcarrier frequency
     float m_chroma_subcarrier_bw;      //!< color (chroma) subcarrier bandwidth
     int m_numberOfVSyncLines;
@@ -216,6 +215,10 @@ private:
 
     float m_sampleRangeCorrection;
 
+    //********** COLOR PROCESSING  **********
+
+    float m_prevColY;
+
     //*************** RF  ***************
 
     MovingAverageUtil<double, double, 32> m_magSqAverage;
@@ -241,11 +244,14 @@ private:
     void demod(Complex& c);
     void applyStandard(int sampleRate, ATVDemodSettings::ATVStd atvStd, float lineDuration);
 
+    inline bool oddEvenLine(void) 
+    { 
+        m_even_odd_line = (bool)((m_lineIndex / 2) % 2);
+        return m_even_odd_line;
+    }
+
     inline void processSample(float& sample, int& sampleVideo, float& chroma)
     {
-        // Filling pixel on the current line - reference index 0 at start of sync pulse
-        m_tvScreenBuffer->setSampleValue(m_sampleOffset - m_numberSamplesPerHSync, sampleVideo);
-
         if (m_settings.m_hSync)
         {
             // Horizontal Synchro detection
@@ -279,25 +285,24 @@ private:
                 }
                 m_sampleOffsetDetected = 0;
             }
-            else
-            {
+            else {
                 // sync with color burst
                 if ((m_sampleOffsetDetected > 115) && (m_sampleOffsetDetected < 115 + (m_numberSamplesPerBurst - 20))){
                     Complex ref = m_hilbert.processSample(chroma);
                     Complex col = m_nco_col.getIQ();
-                    float col_phase = std::arg(col);
                     float ref_phase = std::arg(ref);
+                    float col_phase = std::arg(col);
 
-                    if ((ref_phase - col_phase) > 0.16f){
-                        m_nco_col.setPhase(m_nco_col.convertToPhase(ref_phase -= ((ref_phase - col_phase) * 0.16f)));
-                    }
-                    else if ((ref_phase - col_phase) < -0.16f){
-                        m_nco_col.setPhase(m_nco_col.convertToPhase(ref_phase += ((ref_phase - col_phase) * 0.16f)));
+                    if ((ref_phase - col_phase) > 0.05f) {
+                        m_nco_col.setPhase(m_nco_col.convertToPhase(ref_phase -= (abs(ref_phase - col_phase) * 0.16f)));
+                    } 
+                    else if ((ref_phase - col_phase) < -0.05f) {
+                        m_nco_col.setPhase(m_nco_col.convertToPhase(ref_phase += (abs(ref_phase - col_phase) * 0.16f)));
                     }
 
                     m_sampleOffsetColorBurst++;
-                }
-                else{
+                } 
+                else {
                     m_sampleOffsetColorBurst = 0;
                 }
 
@@ -321,10 +326,10 @@ private:
             float sampleOffsetFloat = m_hSyncShift + m_sampleOffsetFrac - m_samplesPerLineFrac;
             m_sampleOffset = sampleOffsetFloat;
             m_sampleOffsetFrac = sampleOffsetFloat - m_sampleOffset;
-			m_hSyncShift = 0.0f;
+            m_hSyncShift = 0.0f;
 
-			m_lineIndex++;
-			if (m_settings.m_atvStd == ATVDemodSettings::ATVStdHSkip) {
+            m_lineIndex++;
+            if (m_settings.m_atvStd == ATVDemodSettings::ATVStdHSkip) {
                 processEOLHSkip();
             } else {
                 processEOLClassic();
@@ -332,6 +337,9 @@ private:
         }
 
         prevSample = sample;
+
+        // Filling pixel on the current line - reference index 0 at start of sync pulse
+        m_tvScreenBuffer->setSampleValue(m_sampleOffset - m_numberSamplesPerHSync, sampleVideo);
     }
 
     // Standard vertical sync

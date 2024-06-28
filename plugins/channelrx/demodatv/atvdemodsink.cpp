@@ -318,11 +318,8 @@ void ATVDemodSink::demod(Complex& c)
     Complex ref = m_nco_col.nextIQ();
 
     // Get color
-    float mixQ = m_lowpass_q_col.filter(chrominance_sig * (2.0f * ref.real()));
-    float mixI = m_lowpass_i_col.filter(chrominance_sig * (2.0f * ref.imag()));
-
-    float colU = mixI;
-    float colV = m_odd_line? mixQ : -mixQ;
+    float colV = m_lowpass_q_col.filter(chrominance_sig * (2.0f * ref.real())); // red component
+    float colU = m_lowpass_i_col.filter(chrominance_sig * (2.0f * ref.imag())); // blue component
 
     if ((m_videoTabIndex == 1) && (m_scopeSink != 0)) { // feed scope buffer only if scope is present and visible
         m_scopeSampleBuffer.push_back(Sample(chrominance_sig * (SDR_RX_SCALEF - 1.0f), 0.0f));
@@ -485,7 +482,6 @@ void ATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
     applyStandard(m_channelSampleRate, m_settings.m_atvStd, ATVDemodSettings::getNominalLineTime(m_settings.m_nbLines, m_settings.m_fps));
 
     m_nco_col.setFreq(-m_chroma_subcarrier_freq, channelSampleRate);
-    m_nco_col.setPhase(m_nco_col.convertToPhase(135.0f/ RAD_TO_DEG));
 
     m_bandpass_sig.create(21, m_channelSampleRate,
         m_chroma_subcarrier_freq - (m_chroma_subcarrier_bw / 2),
