@@ -215,10 +215,6 @@ private:
 
     float m_sampleRangeCorrection;
 
-    //********** COLOR PROCESSING  **********
-
-    float m_prevColY;
-
     //*************** RF  ***************
 
     MovingAverageUtil<double, double, 32> m_magSqAverage;
@@ -287,7 +283,7 @@ private:
             }
             else {
                 // sync with color burst
-                if ((m_sampleOffsetDetected > 115) && (m_sampleOffsetDetected < 115 + (m_numberSamplesPerBurst - 20))){
+                if ((m_sampleOffsetDetected > 120) && (m_sampleOffsetDetected < 120 + (m_numberSamplesPerBurst - 20))){
                     Complex ref = m_hilbert.processSample(chroma);
                     Complex col = m_nco_col.getIQ();
                     float ref_phase = std::arg(ref);

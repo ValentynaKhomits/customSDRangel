@@ -315,6 +315,7 @@ void ATVDemodSink::demod(Complex& c)
     // Filter out luma part, left only chroma
     chrominance_sig = m_bandpass_sig.filter(2.0f * luminance_sig);
 
+    // Reference signal
     Complex ref = m_nco_col.nextIQ();
 
     // Get color
@@ -330,9 +331,9 @@ void ATVDemodSink::demod(Complex& c)
     float colY = (luminance_sig - m_settings.m_levelBlack);
 
     // Convert YUV to RGB
-    r_col = (int)(std::min(std::max(colY + 1.403f * colV, 0.0f), 1.0f) * 255.0f);
-    g_col = (int)(std::min(std::max(colY - 0.344f * colU - 0.714f * colV, 0.0f), 1.0f) * 255.0f);
-    b_col = (int)(std::min(std::max(colY + 1.770f * colU, 0.0f), 1.0f) * 255.0f);
+    r_col = (int)(std::min(std::max(colY + colV * 1.139883f, 0.0f), 1.0f) * 255.0f);
+    g_col = (int)(std::min(std::max((colY - ((colY + colV * 1.139883f) * 0.299f) - ((colY + colU * 2.032062f) * 0.114f)) / 0.587f, 0.0f), 1.0f) * 255.0f);
+    b_col = (int)(std::min(std::max(colY + colU * 2.032062f, 0.0f), 1.0f) * 255.0f);
 
     // RGB888
     aVideo = (int)b_col << 16 | (int)g_col << 8 | (int)r_col;
