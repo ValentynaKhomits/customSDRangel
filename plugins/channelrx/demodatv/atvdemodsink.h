@@ -140,10 +140,10 @@ private:
     };
 
     int m_channelSampleRate;
-	int m_channelFrequencyOffset;
+    int m_channelFrequencyOffset;
     int m_samplesPerLine;       //!< number of samples per complete line (includes sync signals) - adusted value
-	float m_samplesPerLineFrac; //!< number of samples per complete line (includes sync signals), fractional part
-	ATVDemodSettings m_settings;
+    float m_samplesPerLineFrac; //!< number of samples per complete line (includes sync signals), fractional part
+    ATVDemodSettings m_settings;
     int m_videoTabIndex;
 
     //*************** SCOPE  ***************
@@ -153,7 +153,7 @@ private:
 
     //*************** ATV PARAMETERS  ***************
     TVScreenAnalog *m_registeredTVScreen;
-	TVScreenAnalogBuffer *m_tvScreenBuffer;
+    TVScreenAnalogBuffer *m_tvScreenBuffer;
 
     //int m_intNumberSamplePerLine;
     int m_numberSamplesPerHTop;        //!< number of samples per horizontal synchronization pulse (pulse in ultra-black) - integer value
@@ -198,15 +198,16 @@ private:
     float m_fltBufferI[6];
     float m_fltBufferQ[6];
 
-	int m_amSampleIndex;
+    int m_amSampleIndex;
 
     int m_sampleOffset;         // assumed (averaged) sample offset from the start of horizontal sync pulse
-	float m_sampleOffsetFrac;   // sample offset, fractional part
+    float m_sampleOffsetFrac;   // sample offset, fractional part
     int m_sampleOffsetDetected; // detected sample offset from the start of horizontal sync pulse
     int m_sampleOffsetColorBurst; // detect color burst sample
     int m_lineIndex;
+    int m_prevLineIndex;
 
-	float m_hSyncShift;
+    float m_hSyncShift;
     int m_hSyncErrorCount;
 
     float prevSample;
@@ -300,17 +301,17 @@ private:
                     }
 
                     // Adjust NCO phase based on phase difference
-                    if (phase_diff > 0.05f) {
+                    if (phase_diff > 0.005f) {
                         ref_phase -= (fabs(phase_diff) * 0.16f);
                         m_nco_col.setPhase(m_nco_col.convertToPhase(ref_phase));
                     } 
-                    else if (phase_diff < -0.05f) {
+                    else if (phase_diff < -0.005f) {
                         ref_phase += (fabs(phase_diff) * 0.16f);
                         m_nco_col.setPhase(m_nco_col.convertToPhase(ref_phase));
                     }
 
                     m_sampleOffsetColorBurst++;
-                } 
+                }
                 else {
                     m_sampleOffsetColorBurst = 0;
                 }
@@ -338,11 +339,16 @@ private:
             m_hSyncShift = 0.0f;
 
             m_lineIndex++;
+
             if (m_settings.m_atvStd == ATVDemodSettings::ATVStdHSkip) {
                 processEOLHSkip();
             } else {
                 processEOLClassic();
             }
+
+            //videoStandardDetection();
+
+            m_prevLineIndex = m_lineIndex;
         }
 
         prevSample = sample;
@@ -356,7 +362,7 @@ private:
     {
         if (m_lineIndex == m_numberOfVSyncLines + 3 && m_fieldIndex == 0)
         {
-			m_tvScreenBuffer = m_registeredTVScreen->swapBuffers();
+            m_tvScreenBuffer = m_registeredTVScreen->swapBuffers();
         }
 
         if (m_vSyncDetectSampleCount > m_vSyncDetectThreshold &&
@@ -389,25 +395,53 @@ private:
         if (m_interleaved)
             rowIndex = rowIndex * 2 - m_fieldIndex;
 
-		m_tvScreenBuffer->selectRow(rowIndex, m_sampleOffsetFrac);
-	}
+        m_tvScreenBuffer->selectRow(rowIndex, m_sampleOffsetFrac);
+    }
 
     // Vertical sync is obtained by skipping horizontal sync on the line that triggers vertical sync (new frame)
     inline void processEOLHSkip()
     {
-		if ((m_sampleOffsetDetected > (3 * m_samplesPerLine) / 2) // Vertical sync is first horizontal sync after skip (count at least 1.5 line length)
+        if ((m_sampleOffsetDetected > (3 * m_samplesPerLine) / 2) // Vertical sync is first horizontal sync after skip (count at least 1.5 line length)
             || (!m_settings.m_vSync && (m_lineIndex >= m_settings.m_nbLines))) // Vsync ignored and reached nominal number of lines per frame
         {
-			m_tvScreenBuffer = m_registeredTVScreen->swapBuffers();
-			m_lineIndex = 0;
+            m_tvScreenBuffer = m_registeredTVScreen->swapBuffers();
+            m_lineIndex = 0;
         }
 
-		m_tvScreenBuffer->selectRow(m_lineIndex, m_sampleOffsetFrac);
+        m_tvScreenBuffer->selectRow(m_lineIndex, m_sampleOffsetFrac);
     }
 
+    // dont judge me, its only crappy draft i write it at 1 AM (0_o)
     inline void videoStandardDetection(void)
     {
+        
+        if (((m_prevLineIndex > 310) && (m_lineIndex < 313)) && (m_settings.m_atvStd != m_settings.ATVStdPAL625))
+        {
+            m_settings.m_atvStd = m_settings.ATVStdPAL625;
+            m_settings.m_nbLines = 625;
+            m_settings.m_fps = 25;
 
+            applySettings(m_settings, true);
+
+            qDebug() << "ATVDemodSink::videoStandardDetection:"
+                << "ATVStdPAL625"
+                << "m_nbLines" << m_settings.m_nbLines
+                << "m_fps" << m_settings.m_fps;
+
+        }
+        else if (((m_prevLineIndex < 310) && (m_lineIndex < 3)) && (m_settings.m_atvStd != m_settings.ATVStdPAL525))
+        {
+            m_settings.m_atvStd = m_settings.ATVStdPAL525;
+            m_settings.m_nbLines = 525;
+            m_settings.m_fps = 30; 
+
+            applySettings(m_settings, true);
+
+            qDebug() << "ATVDemodSink::videoStandardDetection:"
+                << "ATVStdPAL525"
+                << "m_nbLines" << m_settings.m_nbLines
+                << "m_fps" << m_settings.m_fps;
+        }
     }
 };
 

@@ -319,8 +319,13 @@ void ATVDemodSink::demod(Complex& c)
 
     Complex col(mixI, mixQ);
 
+    /*
+        TODO: clean-up
+    */
     // rotate with magic numbers (color angel correction)
-    col *= std::polar(1.0f, 0.3768f);
+    //col *= std::polar(1.0f, 0.942f); 
+    //col *= std::polar(1.0f, evenOddLine() ? 0.942f : 2.518f);
+    col *= std::polar(1.0f, evenOddLine() ? 0.4082f : 1.987f);
 
     // set colors
     float colV = col.imag();
@@ -384,7 +389,7 @@ void ATVDemodSink::applyStandard(int sampleRate, ATVDemodSettings::ATVStd atvStd
         m_firstVisibleLine   = 27;
         m_numberSamplesHSyncCrop = (int) (0.085f * lineDuration * sampleRate); // 8.5% of full line empirically
         break;
-    case ATVDemodSettings::ATVStdPAL525: // Follows PAL-M standard
+    case ATVDemodSettings::ATVStdPAL525: // Follows PAL-M standard or NTSC
         // what is left in a 64/1.008 us line for the image
         m_chroma_subcarrier_freq   = 3575611.49f;
         m_chroma_subcarrier_bw     = 1600000.0f;
@@ -400,9 +405,9 @@ void ATVDemodSink::applyStandard(int sampleRate, ATVDemodSettings::ATVStd atvStd
     default:
         // what is left in a 64 us line for the image
         m_chroma_subcarrier_freq   = 4433618.75f;
-        m_chroma_subcarrier_bw     = 1400000.0f;
-        m_chroma_subcarrier_bw_usb = m_chroma_subcarrier_bw / 1.4f;
-        m_chroma_subcarrier_bw_lsb = m_chroma_subcarrier_bw / 1.4f;
+        m_chroma_subcarrier_bw     = 1300000.0f;
+        m_chroma_subcarrier_bw_usb = m_chroma_subcarrier_bw / 2.0f;
+        m_chroma_subcarrier_bw_lsb = m_chroma_subcarrier_bw / 2.0f;
         m_interleaved        = true;
         m_numberOfVSyncLines = 3;
         m_numberOfBlackLines = 49;
@@ -490,14 +495,19 @@ void ATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
 
     applyStandard(m_channelSampleRate, m_settings.m_atvStd, ATVDemodSettings::getNominalLineTime(m_settings.m_nbLines, m_settings.m_fps));
 
-    m_nco_col.setFreq(m_chroma_subcarrier_freq, channelSampleRate);
+    // applicable only for PAL625 and PAL525/NTSC
+    if ((m_settings.m_atvStd == m_settings.ATVStdPAL625) ||
+        (m_settings.m_atvStd == m_settings.ATVStdPAL525))
+    {
+        m_nco_col.setFreq(m_chroma_subcarrier_freq, m_channelSampleRate);
 
-    m_bandpass_sig.create(16, m_channelSampleRate,
-        m_chroma_subcarrier_freq - m_chroma_subcarrier_bw_lsb,
-        m_chroma_subcarrier_freq + m_chroma_subcarrier_bw_usb);
+        m_bandpass_sig.create(15, m_channelSampleRate,
+            m_chroma_subcarrier_freq - m_chroma_subcarrier_bw_lsb,
+            m_chroma_subcarrier_freq + m_chroma_subcarrier_bw_usb);
 
-    m_lowpass_i_col.create(16, m_channelSampleRate, 1500000.0f);
-    m_lowpass_q_col.create(16, m_channelSampleRate, 1500000.0f);
+        m_lowpass_i_col.create(15, m_channelSampleRate, 1500000.0f);
+        m_lowpass_q_col.create(15, m_channelSampleRate, 1500000.0f);
+    }
 
     if (m_registeredTVScreen)
     {
@@ -575,6 +585,21 @@ void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
 
         applyStandard(m_channelSampleRate, settings.m_atvStd,
             ATVDemodSettings::getNominalLineTime(settings.m_nbLines, settings.m_fps));
+
+        // applicable only for PAL625 and PAL525/NTSC
+        if ((settings.m_atvStd == m_settings.ATVStdPAL625) || 
+            (settings.m_atvStd == m_settings.ATVStdPAL525))
+        {
+            // Update NCO freq and filters settings after change config
+            m_nco_col.setFreq(m_chroma_subcarrier_freq, m_channelSampleRate);
+
+            m_bandpass_sig.create(15, m_channelSampleRate,
+                m_chroma_subcarrier_freq - m_chroma_subcarrier_bw_lsb,
+                m_chroma_subcarrier_freq + m_chroma_subcarrier_bw_usb);
+
+            m_lowpass_i_col.create(15, m_channelSampleRate, 1500000.0f);
+            m_lowpass_q_col.create(15, m_channelSampleRate, 1500000.0f);
+        }
 
         if (m_registeredTVScreen)
         {
