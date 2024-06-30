@@ -26,7 +26,7 @@
 class SDRBASE_API NCO {
 private:
 	enum {
-		TableSize = (1 << 12),
+		TableSize = (1 << 14),
 	};
 	static Real m_table[TableSize];
 	static bool m_tableInitialized;
