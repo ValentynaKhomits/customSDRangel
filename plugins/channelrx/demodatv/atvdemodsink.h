@@ -169,9 +169,10 @@ private:
     int m_fieldDetectThreshold1;
     int m_fieldDetectThreshold2;
 
-    bool m_even_odd_line;
     float m_chroma_subcarrier_freq;    //!< color (chroma) subcarrier frequency
     float m_chroma_subcarrier_bw;      //!< color (chroma) subcarrier bandwidth
+    float m_chroma_subcarrier_bw_usb;  //!< color (chroma) subcarrier bandwidth upper side
+    float m_chroma_subcarrier_bw_lsb;  //!< color (chroma) subcarrier bandwidth lower side
     int m_numberOfVSyncLines;
     int m_numberSamplesPerLineSignals; //!< number of samples in the non image part of the line (signals = front porch + pulse + back porch)
     int m_numberSamplesPerHSync;       //!< number of samples per horizontal synchronization pattern (pulse + back porch)
@@ -240,10 +241,10 @@ private:
     void demod(Complex& c);
     void applyStandard(int sampleRate, ATVDemodSettings::ATVStd atvStd, float lineDuration);
 
-    inline bool oddEvenLine(void) 
+    // Even - true, Odd - false
+    inline bool evenOddLine(void)
     { 
-        m_even_odd_line = (bool)((m_lineIndex / 2) % 2);
-        return m_even_odd_line;
+        return (bool)!((m_lineIndex / 2) % 2);
     }
 
     inline void processSample(float& sample, int& sampleVideo, float& chroma)
@@ -288,12 +289,24 @@ private:
                     Complex col = m_nco_col.getIQ();
                     float ref_phase = std::arg(ref);
                     float col_phase = std::arg(col);
+                    float phase_diff = (ref_phase - col_phase);
 
-                    if ((ref_phase - col_phase) > 0.05f) {
-                        m_nco_col.setPhase(m_nco_col.convertToPhase(ref_phase -= (abs(ref_phase - col_phase) * 0.16f)));
+                    // Normalize phase_diff to the range [-pi, pi]
+                    if (phase_diff > M_PI) {
+                        phase_diff -= 2 * M_PI;
+                    }
+                    else if (phase_diff < -M_PI) {
+                        phase_diff += 2 * M_PI;
+                    }
+
+                    // Adjust NCO phase based on phase difference
+                    if (phase_diff > 0.05f) {
+                        ref_phase -= (fabs(phase_diff) * 0.16f);
+                        m_nco_col.setPhase(m_nco_col.convertToPhase(ref_phase));
                     } 
-                    else if ((ref_phase - col_phase) < -0.05f) {
-                        m_nco_col.setPhase(m_nco_col.convertToPhase(ref_phase += (abs(ref_phase - col_phase) * 0.16f)));
+                    else if (phase_diff < -0.05f) {
+                        ref_phase += (fabs(phase_diff) * 0.16f);
+                        m_nco_col.setPhase(m_nco_col.convertToPhase(ref_phase));
                     }
 
                     m_sampleOffsetColorBurst++;
@@ -390,6 +403,11 @@ private:
         }
 
 		m_tvScreenBuffer->selectRow(m_lineIndex, m_sampleOffsetFrac);
+    }
+
+    inline void videoStandardDetection(void)
+    {
+
     }
 };
 

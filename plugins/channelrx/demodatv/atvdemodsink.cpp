@@ -27,13 +27,8 @@
 #include "atvdemodsink.h"
 
 const int ATVDemodSink::m_ssbFftLen = 1024;
+
 #define RAD_TO_DEG   57.29577951308232f
-#define AV_PAL_CHROMA_SUBCARRIER_FREQ_F  4433618.75f
-#define AV_PAL_CHROMA_SUBCARRIER_BW      1300000.0f
-
-#define AV_NTSC_CHROMA_SUBCARRIER_FREQ_F 3575611.49f
-#define AV_NTSC_CHROMA_SUBCARRIER_BW     1600000.0f
-
 
 ATVDemodSink::ATVDemodSink() :
     m_channelSampleRate(1000000),
@@ -319,8 +314,17 @@ void ATVDemodSink::demod(Complex& c)
     Complex ref = m_nco_col.nextIQ();
 
     // Get color
-    float colV = m_lowpass_q_col.filter(chrominance_sig * (2.0f * ref.real())); // red component
-    float colU = m_lowpass_i_col.filter(chrominance_sig * (2.0f * ref.imag())); // blue component
+    float mixQ = m_lowpass_q_col.filter(chrominance_sig * (2.0f * ref.real())); // red component
+    float mixI = m_lowpass_i_col.filter(chrominance_sig * (2.0f * ref.imag())); // blue component
+
+    Complex col(mixI, mixQ);
+
+    // rotate with magic numbers (color angel correction)
+    col *= std::polar(1.0f, 0.3768f);
+
+    // set colors
+    float colV = col.imag();
+    float colU = col.real();
 
     if ((m_videoTabIndex == 1) && (m_scopeSink != 0)) { // feed scope buffer only if scope is present and visible
         m_scopeSampleBuffer.push_back(Sample(chrominance_sig * (SDR_RX_SCALEF - 1.0f), 0.0f));
@@ -382,8 +386,10 @@ void ATVDemodSink::applyStandard(int sampleRate, ATVDemodSettings::ATVStd atvStd
         break;
     case ATVDemodSettings::ATVStdPAL525: // Follows PAL-M standard
         // what is left in a 64/1.008 us line for the image
-        m_chroma_subcarrier_freq = 3575611.49f;
-        m_chroma_subcarrier_bw   = 1600000.0f;
+        m_chroma_subcarrier_freq   = 3575611.49f;
+        m_chroma_subcarrier_bw     = 1600000.0f;
+        m_chroma_subcarrier_bw_usb = m_chroma_subcarrier_bw / 1.6f;
+        m_chroma_subcarrier_bw_lsb = m_chroma_subcarrier_bw / 1.0666666f;
         m_interleaved        = true;
         m_numberOfVSyncLines = 4;
         m_numberOfBlackLines = 45;
@@ -393,8 +399,10 @@ void ATVDemodSink::applyStandard(int sampleRate, ATVDemodSettings::ATVStd atvStd
     case ATVDemodSettings::ATVStdPAL625: // Follows PAL-B/G/H standard
     default:
         // what is left in a 64 us line for the image
-        m_chroma_subcarrier_freq = 4433618.75f;
-        m_chroma_subcarrier_bw   = 1300000.0f;
+        m_chroma_subcarrier_freq   = 4433618.75f;
+        m_chroma_subcarrier_bw     = 1400000.0f;
+        m_chroma_subcarrier_bw_usb = m_chroma_subcarrier_bw / 1.4f;
+        m_chroma_subcarrier_bw_lsb = m_chroma_subcarrier_bw / 1.4f;
         m_interleaved        = true;
         m_numberOfVSyncLines = 3;
         m_numberOfBlackLines = 49;
@@ -482,14 +490,14 @@ void ATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
 
     applyStandard(m_channelSampleRate, m_settings.m_atvStd, ATVDemodSettings::getNominalLineTime(m_settings.m_nbLines, m_settings.m_fps));
 
-    m_nco_col.setFreq(-m_chroma_subcarrier_freq, channelSampleRate);
+    m_nco_col.setFreq(m_chroma_subcarrier_freq, channelSampleRate);
 
-    m_bandpass_sig.create(21, m_channelSampleRate,
-        m_chroma_subcarrier_freq - (m_chroma_subcarrier_bw / 2),
-        m_chroma_subcarrier_freq + (m_chroma_subcarrier_bw / 2));
+    m_bandpass_sig.create(16, m_channelSampleRate,
+        m_chroma_subcarrier_freq - m_chroma_subcarrier_bw_lsb,
+        m_chroma_subcarrier_freq + m_chroma_subcarrier_bw_usb);
 
-    m_lowpass_i_col.create(21, m_channelSampleRate, 2000000.0f);
-    m_lowpass_q_col.create(21, m_channelSampleRate, 2000000.0f);
+    m_lowpass_i_col.create(16, m_channelSampleRate, 1500000.0f);
+    m_lowpass_q_col.create(16, m_channelSampleRate, 1500000.0f);
 
     if (m_registeredTVScreen)
     {
