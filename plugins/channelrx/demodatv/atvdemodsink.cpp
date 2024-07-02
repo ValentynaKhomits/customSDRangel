@@ -319,13 +319,8 @@ void ATVDemodSink::demod(Complex& c)
 
     Complex col(mixI, mixQ);
 
-    /*
-        TODO: clean-up
-    */
     // rotate with magic numbers (color angel correction)
-    //col *= std::polar(1.0f, 0.942f); 
-    //col *= std::polar(1.0f, evenOddLine() ? 0.942f : 2.518f);
-    col *= std::polar(1.0f, evenOddLine() ? 0.4082f : 1.987f);
+    col *= std::polar(1.5f, evenOddLine() ? 0.4082f : 1.987f);
 
     // set colors
     float colV = col.imag();

@@ -61,6 +61,9 @@
       </item>
       <item>
        <widget class="QComboBox" name="nbLines">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
         <property name="maximumSize">
          <size>
           <width>50</width>
@@ -151,6 +154,9 @@
       </item>
       <item>
        <widget class="QComboBox" name="fps">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
         <property name="maximumSize">
          <size>
           <width>45</width>
@@ -231,33 +237,16 @@
         </item>
         <item>
          <property name="text">
-          <string>PAL525</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>819L</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>ShortI</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>ShortNI</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>HSkip</string>
+          <string>NTSC</string>
          </property>
         </item>
        </widget>
       </item>
       <item>
        <widget class="QCheckBox" name="hSync">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
         <property name="toolTip">
          <string>Toggle horizontal synchronization</string>
         </property>
@@ -268,6 +257,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="vSync">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
         <property name="toolTip">
          <string>Toggle vertical synchronization</string>
         </property>
@@ -278,6 +270,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="invertVideo">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
         <property name="toolTip">
          <string>Toggle video inversion</string>
         </property>

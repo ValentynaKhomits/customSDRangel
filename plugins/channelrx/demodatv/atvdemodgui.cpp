@@ -510,6 +510,19 @@ void ATVDemodGUI::on_fps_currentIndexChanged(int index)
 void ATVDemodGUI::on_standard_currentIndexChanged(int index)
 {
     m_settings.m_atvStd = (ATVDemodSettings::ATVStd) index;
+
+    if (m_settings.m_atvStd == ATVDemodSettings::ATVStdPAL525)
+    {
+        m_settings.m_fps = 30;
+        m_settings.m_nbLines = 525;
+    } 
+    else
+    {
+        m_settings.m_fps = 25;
+        m_settings.m_nbLines = 625;
+    }
+
+    applySampleRate();
     applySettings();
 }
 

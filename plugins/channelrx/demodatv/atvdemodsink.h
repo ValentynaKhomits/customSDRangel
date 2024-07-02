@@ -286,7 +286,7 @@ private:
             else {
                 // sync with color burst
                 if ((m_sampleOffsetDetected > 120) && (m_sampleOffsetDetected < 120 + (m_numberSamplesPerBurst - 20))){
-                    Complex ref = m_hilbert.processSample(chroma);
+                    Complex ref = m_hilbert.processSample(1.5f * chroma);
                     Complex col = m_nco_col.getIQ();
                     float ref_phase = std::arg(ref);
                     float col_phase = std::arg(col);
