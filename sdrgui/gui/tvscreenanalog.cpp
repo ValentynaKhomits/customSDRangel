@@ -126,7 +126,7 @@ TVScreenAnalog::TVScreenAnalog(QWidget *parent)	:
 	m_backBuffer = new TVScreenAnalogBuffer(5, 1);
 
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(tick()));
-	m_updateTimer.start(40); // capped at 25 FPS
+	m_updateTimer.start(20); // capped at 25 FPS
 }
 
 TVScreenAnalog::~TVScreenAnalog()

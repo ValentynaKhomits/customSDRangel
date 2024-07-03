@@ -37,16 +37,23 @@
 
 #include "atvdemodsettings.h"
 
-const std::vector<double> hilbert_coeffs = {
-    // Insert the coefficients generated from the Python script here
-    -0.0033, -0.0027, -0.0012,  0.0016,  0.0056,  0.0108,  0.0170,  0.0240,
-     0.0313,  0.0385,  0.0452,  0.0508,  0.0547,  0.0563,  0.0550,  0.0506,
-     0.0427,  0.0312,  0.0160, -0.0023, -0.0226, -0.0434, -0.0632, -0.0807,
-    -0.0947, -0.1042, -0.1081, -0.1057, -0.0963, -0.0796, -0.0555, -0.0245,
-     0.0131,  0.0566,  0.1042,  0.1541,  0.2039,  0.2510,  0.2925,  0.3253,
-     0.3461
-};
+//const std::vector<double> hilbert_coeffs = {
+//    // Insert the coefficients generated from the Python script here
+//    -0.0033, -0.0027, -0.0012,  0.0016,  0.0056,  0.0108,  0.0170,  0.0240,
+//     0.0313,  0.0385,  0.0452,  0.0508,  0.0547,  0.0563,  0.0550,  0.0506,
+//     0.0427,  0.0312,  0.0160, -0.0023, -0.0226, -0.0434, -0.0632, -0.0807,
+//    -0.0947, -0.1042, -0.1081, -0.1057, -0.0963, -0.0796, -0.0555, -0.0245,
+//     0.0131,  0.0566,  0.1042,  0.1541,  0.2039,  0.2510,  0.2925,  0.3253,
+//     0.3461
+//};
 
+const std::vector<double> hilbert_coeffs = {
+    // These coefficients should be designed for your specific application.
+    // Below is an example of 21-tap Hilbert transformer coefficients
+    -0.0952, -0.0572,  0.0,     0.0632,  0.0952,  0.0632,  0.0,     -0.0572, -0.0952,
+    -0.0572, 0.0,     0.0572,  0.0952,  0.0572,  0.0,     -0.0632, -0.0952, -0.0632,
+    0.0,     0.0572,  0.0952
+};
 
 class ScopeVis;
 
@@ -227,8 +234,8 @@ private:
     Bandpass<Real> m_bandpass_sig;
     Lowpass<Real> m_lowpass_i_col;
     Lowpass<Real> m_lowpass_q_col;
-    SimplePhaseLock m_bfoPLL;
-    SecondOrderRecursiveFilter m_bfoFilter;
+    //SimplePhaseLock m_bfoPLL;
+    //SecondOrderRecursiveFilter m_bfoFilter;
 
     // Used for vestigial SSB with asymmetrical filtering (needs double sideband scheme)
     fftfilt* m_DSBFilter;

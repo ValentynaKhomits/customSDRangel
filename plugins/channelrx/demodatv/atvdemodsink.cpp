@@ -55,8 +55,8 @@ ATVDemodSink::ATVDemodSink() :
     m_hSyncErrorCount(0),
     m_ampAverage(4800),
     m_nco_col(),
-    m_bfoPLL(200 / 1000000, 100 / 1000000, 0.01),
-    m_bfoFilter(200.0, 1000000.0, 0.9),
+    /*m_bfoPLL(200 / 1000000, 100 / 1000000, 0.01),*/
+    /*m_bfoFilter(200.0, 1000000.0, 0.9),*/
     m_DSBFilter(nullptr),
     m_DSBFilterBuffer(nullptr),
     m_DSBFilterBufferIndex(0)
@@ -205,27 +205,27 @@ float ATVDemodSink::getVideoSample(Complex& c, ATVDemodSettings::ATVModulation m
         m_ampAverage(sampleRaw);
         sample = sampleRaw / (2.0f * m_ampAverage.asFloat()); // AGC
     }
-    else if ((m_settings.m_atvModulation == ATVDemodSettings::ATV_USB) || (m_settings.m_atvModulation == ATVDemodSettings::ATV_LSB))
-    {
-        magSq = fltI * fltI + fltQ * fltQ;
-        m_magSqAverage(magSq);
-        sampleNorm = sqrt(magSq);
+    //else if ((m_settings.m_atvModulation == ATVDemodSettings::ATV_USB) || (m_settings.m_atvModulation == ATVDemodSettings::ATV_LSB))
+    //{
+    //    magSq = fltI * fltI + fltQ * fltQ;
+    //    m_magSqAverage(magSq);
+    //    sampleNorm = sqrt(magSq);
 
-        Real bfoValues[2];
-        float fltFiltered = m_bfoFilter.run(fltI);
-        m_bfoPLL.process(fltFiltered, bfoValues);
+    //    Real bfoValues[2];
+    //    float fltFiltered = m_bfoFilter.run(fltI);
+    //    m_bfoPLL.process(fltFiltered, bfoValues);
 
-        // do the mix
+    //    // do the mix
 
-        float mixI = fltI * bfoValues[0] - fltQ * bfoValues[1];
-        float mixQ = fltI * bfoValues[1] + fltQ * bfoValues[0];
+    //    float mixI = fltI * bfoValues[0] - fltQ * bfoValues[1];
+    //    float mixQ = fltI * bfoValues[1] + fltQ * bfoValues[0];
 
-        if (m_settings.m_atvModulation == ATVDemodSettings::ATV_USB) {
-            sample = (mixI + mixQ);
-        } else {
-            sample = (mixI - mixQ);
-        }
-    }
+    //    if (m_settings.m_atvModulation == ATVDemodSettings::ATV_USB) {
+    //        sample = (mixI + mixQ);
+    //    } else {
+    //        sample = (mixI - mixQ);
+    //    }
+    //}
     else if (m_settings.m_atvModulation == ATVDemodSettings::ATV_FM3)
     {
         float rawDeviation;
@@ -442,11 +442,12 @@ void ATVDemodSink::applyStandard(int sampleRate, ATVDemodSettings::ATVStd atvStd
 
 bool ATVDemodSink::getBFOLocked()
 {
-    if ((m_settings.m_atvModulation == ATVDemodSettings::ATV_USB) || (m_settings.m_atvModulation == ATVDemodSettings::ATV_LSB)) {
-        return m_bfoPLL.locked();
-    } else {
-        return false;
-    }
+    //if ((m_settings.m_atvModulation == ATVDemodSettings::ATV_USB) || (m_settings.m_atvModulation == ATVDemodSettings::ATV_LSB)) {
+    //    return m_bfoPLL.locked();
+    //} else {
+    //    return false;
+    //}
+    return false;
 }
 
 void ATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
@@ -482,10 +483,10 @@ void ATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
         std::fill(m_DSBFilterBuffer, m_DSBFilterBuffer + m_ssbFftLen, Complex{0.0, 0.0});
         m_DSBFilterBufferIndex = 0;
 
-        m_bfoPLL.configure((float) m_settings.m_bfoFrequency / (float) m_channelSampleRate,
-                100.0 / m_channelSampleRate,
-                0.01);
-        m_bfoFilter.setFrequencies(m_channelSampleRate, m_settings.m_bfoFrequency);
+        //m_bfoPLL.configure((float) m_settings.m_bfoFrequency / (float) m_channelSampleRate,
+        //        100.0 / m_channelSampleRate,
+        //        0.01);
+        //m_bfoFilter.setFrequencies(m_channelSampleRate, m_settings.m_bfoFrequency);
     }
 
     applyStandard(m_channelSampleRate, m_settings.m_atvStd, ATVDemodSettings::getNominalLineTime(m_settings.m_nbLines, m_settings.m_fps));
@@ -496,12 +497,12 @@ void ATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
     {
         m_nco_col.setFreq(m_chroma_subcarrier_freq, m_channelSampleRate);
 
-        m_bandpass_sig.create(15, m_channelSampleRate,
+        m_bandpass_sig.create(11, m_channelSampleRate,
             m_chroma_subcarrier_freq - m_chroma_subcarrier_bw_lsb,
             m_chroma_subcarrier_freq + m_chroma_subcarrier_bw_usb);
 
-        m_lowpass_i_col.create(15, m_channelSampleRate, 1500000.0f);
-        m_lowpass_q_col.create(15, m_channelSampleRate, 1500000.0f);
+        m_lowpass_i_col.create(11, m_channelSampleRate, 1500000.0f);
+        m_lowpass_q_col.create(11, m_channelSampleRate, 1500000.0f);
     }
 
     if (m_registeredTVScreen)
@@ -557,10 +558,10 @@ void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
 
     if ((settings.m_bfoFrequency != m_settings.m_bfoFrequency) || force)
     {
-        m_bfoPLL.configure((float) settings.m_bfoFrequency / (float) m_channelSampleRate,
-                100.0 / m_channelSampleRate,
-                0.01);
-        m_bfoFilter.setFrequencies(m_channelSampleRate, settings.m_bfoFrequency);
+        //m_bfoPLL.configure((float) settings.m_bfoFrequency / (float) m_channelSampleRate,
+        //        100.0 / m_channelSampleRate,
+        //        0.01);
+        //m_bfoFilter.setFrequencies(m_channelSampleRate, settings.m_bfoFrequency);
     }
 
     if ((settings.m_nbLines != m_settings.m_nbLines)

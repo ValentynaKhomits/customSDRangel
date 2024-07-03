@@ -34,7 +34,7 @@ void ATVDemodSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
     m_bfoFrequency = 0.0f;
-    m_atvModulation = ATV_FM2;
+    m_atvModulation = ATV_FM1;
     m_fmDeviation = 0.5f;
     m_amScalingFactor = 100;
     m_amOffsetFactor = 0;
