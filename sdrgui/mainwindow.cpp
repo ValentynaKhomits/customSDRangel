@@ -1435,49 +1435,6 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
                 deviceWorkspaceIndex;
             sampleSourceAdd(m_workspaces[deviceWorkspaceIndex], m_workspaces[spectrumWorkspaceIndex], bestDeviceIndex);
         }
-        else if (deviceSetPreset.isSinkPreset())
-        {
-            int bestDeviceIndex = DeviceEnumerator::instance()->getBestTxSamplingDeviceIndex(
-                deviceSetPreset.getSelectedDevice().m_deviceId,
-                deviceSetPreset.getSelectedDevice().m_deviceSerial,
-                deviceSetPreset.getSelectedDevice().m_deviceSequence,
-                deviceSetPreset.getSelectedDevice().m_deviceItemIndex
-            );
-            qDebug("MainWindow::loadConfiguration: add sink %s in workspace %d spectrum in %d",
-                qPrintable(deviceSetPreset.getSelectedDevice().m_deviceId),
-                deviceSetPreset.getDeviceWorkspaceIndex(),
-                deviceSetPreset.getSpectrumWorkspaceIndex());
-            int deviceWorkspaceIndex = deviceSetPreset.getDeviceWorkspaceIndex() < m_workspaces.size() ?
-                deviceSetPreset.getDeviceWorkspaceIndex() :
-                0;
-            int spectrumWorkspaceIndex = deviceSetPreset.getSpectrumWorkspaceIndex() < m_workspaces.size() ?
-                deviceSetPreset.getSpectrumWorkspaceIndex() :
-                deviceWorkspaceIndex;
-            sampleSinkAdd(m_workspaces[deviceWorkspaceIndex], m_workspaces[spectrumWorkspaceIndex], bestDeviceIndex);
-        }
-        else if (deviceSetPreset.isMIMOPreset())
-        {
-            int bestDeviceIndex = DeviceEnumerator::instance()->getBestMIMOSamplingDeviceIndex(
-                deviceSetPreset.getSelectedDevice().m_deviceId,
-                deviceSetPreset.getSelectedDevice().m_deviceSerial,
-                deviceSetPreset.getSelectedDevice().m_deviceSequence
-            );
-            qDebug("MainWindow::loadConfiguration: add MIMO %s in workspace %d spectrum in %d",
-                qPrintable(deviceSetPreset.getSelectedDevice().m_deviceId),
-                deviceSetPreset.getDeviceWorkspaceIndex(),
-                deviceSetPreset.getSpectrumWorkspaceIndex());
-            int deviceWorkspaceIndex = deviceSetPreset.getDeviceWorkspaceIndex() < m_workspaces.size() ?
-                deviceSetPreset.getDeviceWorkspaceIndex() :
-                0;
-            int spectrumWorkspaceIndex = deviceSetPreset.getSpectrumWorkspaceIndex() < m_workspaces.size() ?
-                deviceSetPreset.getSpectrumWorkspaceIndex() :
-                deviceWorkspaceIndex;
-            sampleMIMOAdd(m_workspaces[deviceWorkspaceIndex], m_workspaces[spectrumWorkspaceIndex], bestDeviceIndex);
-        }
-        else
-        {
-            qDebug() << "MainWindow::loadConfiguration: Unknown preset type: " << deviceSetPreset.getPresetType();
-        }
 
         if (m_deviceUIs.size() > 0)
         {
@@ -2669,7 +2626,8 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
         ChannelGUI *gui = nullptr;
         ChannelAPI *channelAPI;
         DeviceAPI *deviceAPI = deviceUI->m_deviceAPI;
-
+        qDebug("MainWindow::channelAddClicked:channelPluginIndex %d",
+            channelPluginIndex);
         if (deviceUI->m_deviceSourceEngine) // source device => Rx channels
         {
             PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getRxChannelRegistrations(); // Available channel plugins

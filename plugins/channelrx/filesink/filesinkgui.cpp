@@ -208,6 +208,7 @@ FileSinkGUI::FileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     ui->deltaFrequency->setValueRange(false, 8, -99999999, 99999999);
     ui->position->setEnabled(m_fixedPosition);
     ui->glSpectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
+    ui->glSpectrumGUI->setVisible(false);
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.setColor(m_settings.m_rgbColor);

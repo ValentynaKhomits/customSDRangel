@@ -160,7 +160,8 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     connect(spectrum->getSpectrumView(), &GLSpectrumView::timeSelected, this, &MainSpectrumGUI::onTimeSelected);
 
     m_resizer.enableChildMouseTracking();
-    shrinkWindow();
+   // shrinkWindow();
+    m_hideButton->click();
 }
 
 MainSpectrumGUI::~MainSpectrumGUI()

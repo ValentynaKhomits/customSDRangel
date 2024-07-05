@@ -246,8 +246,8 @@ void GLSpectrumGUI::displaySettings()
     setAveragingToolitp();
     ui->calibration->setChecked(m_settings.m_useCalibration);
     ui->resetMeasurements->setVisible(m_settings.m_measurement >= SpectrumSettings::MeasurementChannelPower);
-    displayGotoMarkers();
-    displayControls();
+   // displayGotoMarkers();
+   // displayControls();
 
     ui->fftWindow->blockSignals(false);
     ui->averaging->blockSignals(false);

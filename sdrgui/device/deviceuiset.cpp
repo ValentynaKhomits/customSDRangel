@@ -55,6 +55,7 @@ DeviceUISet::DeviceUISet(int deviceSetIndex, DeviceSet *deviceSet)
     m_spectrumGUI = new GLSpectrumGUI;
     m_spectrumGUI->setBuddies(m_spectrumVis, m_spectrum);
     m_mainSpectrumGUI = new MainSpectrumGUI(m_spectrum, m_spectrumGUI);
+    m_mainSpectrumGUI->setVisible(false);
     // m_channelWindow = new ChannelWindow;
     m_deviceAPI = nullptr;
     m_deviceGUI = nullptr;
@@ -263,10 +264,6 @@ void DeviceUISet::loadDeviceSetSettings(
 
     if (m_deviceSourceEngine) { // source device
         loadRxChannelSettings(preset, pluginAPI, workspaces, currentWorkspace);
-    } else if (m_deviceSinkEngine) { // sink device
-        loadTxChannelSettings(preset, pluginAPI, workspaces, currentWorkspace);
-    } else if (m_deviceMIMOEngine) { // MIMO device
-        loadMIMOChannelSettings(preset, pluginAPI, workspaces, currentWorkspace);
     }
 }
 
@@ -292,16 +289,6 @@ void DeviceUISet::saveDeviceSetSettings(Preset* preset) const
     {
         preset->setSourcePreset();
         saveRxChannelSettings(preset);
-    }
-    else if (m_deviceSinkEngine) // sink device
-    {
-        preset->setSinkPreset();
-        saveTxChannelSettings(preset);
-    }
-    else if (m_deviceMIMOEngine) // MIMO device
-    {
-        preset->setMIMOPreset();
-        saveMIMOChannelSettings(preset);
     }
 
     m_deviceAPI->saveSamplingDeviceSettings(preset);

@@ -189,7 +189,6 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
         this,
         &DeviceGUI::addChannelEmitted
     );
-    m_addChannelsButton->click();
 }
 
 DeviceGUI::~DeviceGUI()
