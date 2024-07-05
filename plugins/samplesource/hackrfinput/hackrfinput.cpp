@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include <QDebug>
+#include <QFile>
 #include <QNetworkReply>
 #include <QBuffer>
 
@@ -39,6 +40,7 @@
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgConfigureHackRF, Message)
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgReportHackRF, Message)
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(HackRFInput::MsgStartStopFr, Message)
 
 HackRFInput::HackRFInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -295,6 +297,21 @@ bool HackRFInput::handleMessage(const Message& message)
 
         return true;
     }
+    else if (MsgStartStopFr::match(message))
+    {
+        MsgStartStopFr& cmd = (MsgStartStopFr&)message;
+        qDebug() << "HackRFInput::handleMessage: MsgStartStopFr: " << (cmd.getStartStop() ? "start" : "stop");
+
+        if (cmd.getStartStop())
+        {
+            //continue change frequency
+        }
+        else
+        {
+            //stop change frequency
+        }
+        return true;
+    }
     else if (DeviceHackRFShared::MsgSynchronizeFrequency::match(message))
     {
         DeviceHackRFShared::MsgSynchronizeFrequency& freqMsg = (DeviceHackRFShared::MsgSynchronizeFrequency&) message;
@@ -327,6 +344,29 @@ bool HackRFInput::handleMessage(const Message& message)
 	{
 		return false;
 	}
+}
+
+QVector<quint64>& HackRFInput::readFrequencyFile()
+{
+    QFile file("frequency.txt");
+    if (file.open(QFile::ReadOnly)) {
+        char buf[1024];
+        qint64 lineLength = file.readLine(buf, sizeof(buf));
+        if (lineLength != -1) {
+            m_frequencyValues.clear();
+            QString frSeq = QString::fromLocal8Bit(buf);
+            qDebug("HackRFInput::readFile: Frequency sequence: %s", frSeq);
+            QStringList list = frSeq.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+            for (const auto& i : list)
+            {
+                m_frequencyValues.push_back(static_cast<quint64>(i.toULongLong()));
+            }
+        }
+        else {
+            qCritical("HackRFInput::readFile: Cannot read file: %s", file.fileName());
+        }
+    }
+    return m_frequencyValues;
 }
 
 void HackRFInput::setDeviceCenterFrequency(quint64 freq_hz, int loPpmTenths)

@@ -151,6 +151,15 @@ bool HackRFInputGui::handleMessage(const Message& message)
 
         return true;
     }
+    else if (HackRFInput::MsgStartStopFr::match(message))
+    {
+        HackRFInput::MsgStartStopFr& notif = (HackRFInput::MsgStartStopFr&)message;
+        blockApplySettings(true);
+        ui->startStopFr->setChecked(notif.getStartStop());
+        blockApplySettings(false);
+
+        return true;
+    }
     else
     {
         return false;
@@ -264,7 +273,7 @@ void HackRFInputGui::displaySettings()
     ui->transverter->setIQOrder(m_settings.m_iqOrder);
 
     updateFrequencyLimits();
-
+    //ui->startStopFr
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 	ui->LOppm->setValue(m_settings.m_LOppmTenths);
 	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
@@ -465,6 +474,14 @@ void HackRFInputGui::on_startStop_toggled(bool checked)
         m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
+void HackRFInputGui::on_startStopFr_toggled(bool checked)
+{
+    if (m_doApplySettings)
+    {
+        HackRFInput::MsgStartStopFr* message = HackRFInput::MsgStartStopFr::create(checked);
+        m_sampleSource->getInputMessageQueue()->push(message);
+    }
+}
 
 void HackRFInputGui::on_sampleRateMode_toggled(bool checked)
 {
@@ -576,6 +593,7 @@ void HackRFInputGui::makeUIConnections()
     //QObject::connect(ui->bbFilter, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &HackRFInputGui::on_bbFilter_currentIndexChanged);
     QObject::connect(ui->vga, &QSlider::valueChanged, this, &HackRFInputGui::on_vga_valueChanged);
     QObject::connect(ui->startStop, &ButtonSwitch::toggled, this, &HackRFInputGui::on_startStop_toggled);
+    QObject::connect(ui->startStopFr, &ButtonSwitch::toggled, this, &HackRFInputGui::on_startStopFr_toggled);
     //QObject::connect(ui->sampleRateMode, &QToolButton::toggled, this, &HackRFInputGui::on_sampleRateMode_toggled);
     QObject::connect(ui->transverter, &TransverterButton::clicked, this, &HackRFInputGui::on_transverter_clicked);
 }

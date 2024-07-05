@@ -24,6 +24,7 @@
 
 #include <QString>
 #include <QByteArray>
+#include <QVector>
 #include <QNetworkRequest>
 
 #include "libhackrf/hackrf.h"
@@ -103,6 +104,24 @@ public:
         { }
     };
 
+    class MsgStartStopFr : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getStartStop() const { return m_startStop; }
+
+        static MsgStartStopFr* create(bool startStop) {
+            return new MsgStartStopFr(startStop);
+        }
+
+    protected:
+        bool m_startStop;
+
+        MsgStartStopFr(bool startStop) :
+            Message(),
+            m_startStop(startStop)
+        { }
+    };
 	HackRFInput(DeviceAPI *deviceAPI);
 	virtual ~HackRFInput();
 	virtual void destroy();
@@ -119,6 +138,7 @@ public:
 	virtual int getSampleRate() const;
     virtual void setSampleRate(int sampleRate) { (void) sampleRate; }
 	virtual quint64 getCenterFrequency() const;
+    QVector<quint64>& readFrequencyFile();
     virtual void setCenterFrequency(qint64 centerFrequency);
 
 	virtual bool handleMessage(const Message& message);
@@ -162,6 +182,7 @@ private:
 	bool m_running;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+    QVector<quint64> m_frequencyValues;
 
     bool openDevice();
     void closeDevice();

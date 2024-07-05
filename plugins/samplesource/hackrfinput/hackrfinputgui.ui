@@ -101,6 +101,26 @@
        </item>
       </layout>
      </item>
+	 <item>
+	  <layout class="QHBoxLayout" name="deviceButtonsLayout">
+	   <item>
+		<widget class="ButtonSwitch" name="startStopFr">
+		 <property name="toolTip">
+		  <string>start/stop acquisition</string>
+		 </property>
+		 <property name="text">
+		  <string/>
+		 </property>
+		 <property name="icon">
+		  <iconset resource="../../../sdrgui/resources/res.qrc">
+			<normaloff>:/play.png</normaloff>
+			<normalon>:/stop.png</normalon>:/play.png
+		  </iconset>
+		 </property>
+		</widget>
+	   </item>
+	  </layout>
+	 </item>
      <item>
       <spacer name="freqLeftSpacer">
        <property name="orientation">
