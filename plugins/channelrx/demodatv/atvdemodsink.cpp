@@ -28,8 +28,6 @@
 
 const int ATVDemodSink::m_ssbFftLen = 1024;
 
-#define RAD_TO_DEG   57.29577951308232f
-
 ATVDemodSink::ATVDemodSink() :
     m_channelSampleRate(1000000),
     m_channelFrequencyOffset(0),
@@ -55,8 +53,6 @@ ATVDemodSink::ATVDemodSink() :
     m_hSyncErrorCount(0),
     m_ampAverage(4800),
     m_nco_col(),
-    /*m_bfoPLL(200 / 1000000, 100 / 1000000, 0.01),*/
-    /*m_bfoFilter(200.0, 1000000.0, 0.9),*/
     m_DSBFilter(nullptr),
     m_DSBFilterBuffer(nullptr),
     m_DSBFilterBufferIndex(0)
@@ -205,27 +201,6 @@ float ATVDemodSink::getVideoSample(Complex& c, ATVDemodSettings::ATVModulation m
         m_ampAverage(sampleRaw);
         sample = sampleRaw / (2.0f * m_ampAverage.asFloat()); // AGC
     }
-    //else if ((m_settings.m_atvModulation == ATVDemodSettings::ATV_USB) || (m_settings.m_atvModulation == ATVDemodSettings::ATV_LSB))
-    //{
-    //    magSq = fltI * fltI + fltQ * fltQ;
-    //    m_magSqAverage(magSq);
-    //    sampleNorm = sqrt(magSq);
-
-    //    Real bfoValues[2];
-    //    float fltFiltered = m_bfoFilter.run(fltI);
-    //    m_bfoPLL.process(fltFiltered, bfoValues);
-
-    //    // do the mix
-
-    //    float mixI = fltI * bfoValues[0] - fltQ * bfoValues[1];
-    //    float mixQ = fltI * bfoValues[1] + fltQ * bfoValues[0];
-
-    //    if (m_settings.m_atvModulation == ATVDemodSettings::ATV_USB) {
-    //        sample = (mixI + mixQ);
-    //    } else {
-    //        sample = (mixI - mixQ);
-    //    }
-    //}
     else if (m_settings.m_atvModulation == ATVDemodSettings::ATV_FM3)
     {
         float rawDeviation;
@@ -354,37 +329,7 @@ void ATVDemodSink::applyStandard(int sampleRate, ATVDemodSettings::ATVStd atvStd
 {
     switch(atvStd)
     {
-    case ATVDemodSettings::ATVStdHSkip:
-        // what is left in a line for the image
-        m_interleaved        = false; // irrelevant
-        m_numberOfBlackLines = 0;
-        m_numberSamplesHSyncCrop = (int) (0.09f * lineDuration * sampleRate); // 9% of full line empirically
-        break;
-    case ATVDemodSettings::ATVStdShort:
-        // what is left in a line for the image
-        m_interleaved        = false;
-        m_numberOfVSyncLines = 2;
-        m_numberOfBlackLines = 4;
-        m_firstVisibleLine   = 3;
-        m_numberSamplesHSyncCrop = (int) (0.085f * lineDuration * sampleRate); // 8.5% of full line empirically
-        break;
-    case ATVDemodSettings::ATVStdShortInterleaved:
-        // what is left in a line for the image
-        m_interleaved        = true;
-        m_numberOfVSyncLines = 2;
-        m_numberOfBlackLines = 5;
-        m_firstVisibleLine   = 3;
-        m_numberSamplesHSyncCrop = (int) (0.085f * lineDuration * sampleRate); // 8.5% of full line empirically
-        break;
-    case ATVDemodSettings::ATVStd819: // 819 lines standard F
-        // what is left in a line for the image
-        m_interleaved        = true;
-        m_numberOfVSyncLines = 4;
-        m_numberOfBlackLines = 59;
-        m_firstVisibleLine   = 27;
-        m_numberSamplesHSyncCrop = (int) (0.085f * lineDuration * sampleRate); // 8.5% of full line empirically
-        break;
-    case ATVDemodSettings::ATVStdPAL525: // Follows PAL-M standard or NTSC
+    case ATVDemodSettings::ATVStdNTSC: // Follows PAL-M standard or NTSC
         // what is left in a 64/1.008 us line for the image
         m_chroma_subcarrier_freq   = 3575611.49f;
         m_chroma_subcarrier_bw     = 1600000.0f;
@@ -442,11 +387,6 @@ void ATVDemodSink::applyStandard(int sampleRate, ATVDemodSettings::ATVStd atvStd
 
 bool ATVDemodSink::getBFOLocked()
 {
-    //if ((m_settings.m_atvModulation == ATVDemodSettings::ATV_USB) || (m_settings.m_atvModulation == ATVDemodSettings::ATV_LSB)) {
-    //    return m_bfoPLL.locked();
-    //} else {
-    //    return false;
-    //}
     return false;
 }
 
@@ -482,18 +422,13 @@ void ATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
         );
         std::fill(m_DSBFilterBuffer, m_DSBFilterBuffer + m_ssbFftLen, Complex{0.0, 0.0});
         m_DSBFilterBufferIndex = 0;
-
-        //m_bfoPLL.configure((float) m_settings.m_bfoFrequency / (float) m_channelSampleRate,
-        //        100.0 / m_channelSampleRate,
-        //        0.01);
-        //m_bfoFilter.setFrequencies(m_channelSampleRate, m_settings.m_bfoFrequency);
     }
 
     applyStandard(m_channelSampleRate, m_settings.m_atvStd, ATVDemodSettings::getNominalLineTime(m_settings.m_nbLines, m_settings.m_fps));
 
     // applicable only for PAL625 and PAL525/NTSC
     if ((m_settings.m_atvStd == m_settings.ATVStdPAL625) ||
-        (m_settings.m_atvStd == m_settings.ATVStdPAL525))
+        (m_settings.m_atvStd == m_settings.ATVStdNTSC))
     {
         m_nco_col.setFreq(m_chroma_subcarrier_freq, m_channelSampleRate);
 
@@ -556,14 +491,6 @@ void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
         m_DSBFilterBufferIndex = 0;
     }
 
-    if ((settings.m_bfoFrequency != m_settings.m_bfoFrequency) || force)
-    {
-        //m_bfoPLL.configure((float) settings.m_bfoFrequency / (float) m_channelSampleRate,
-        //        100.0 / m_channelSampleRate,
-        //        0.01);
-        //m_bfoFilter.setFrequencies(m_channelSampleRate, settings.m_bfoFrequency);
-    }
-
     if ((settings.m_nbLines != m_settings.m_nbLines)
      || (settings.m_fps != m_settings.m_fps)
      || (settings.m_atvStd != m_settings.m_atvStd) || force)
@@ -584,7 +511,7 @@ void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
 
         // applicable only for PAL625 and PAL525/NTSC
         if ((settings.m_atvStd == m_settings.ATVStdPAL625) || 
-            (settings.m_atvStd == m_settings.ATVStdPAL525))
+            (settings.m_atvStd == m_settings.ATVStdNTSC))
         {
             // Update NCO freq and filters settings after change config
             m_nco_col.setFreq(m_chroma_subcarrier_freq, m_channelSampleRate);

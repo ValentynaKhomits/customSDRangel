@@ -39,7 +39,7 @@ struct ATVDemodSettings
     enum ATVStd
     {
         ATVStdPAL625,
-        ATVStdPAL525,
+        ATVStdNTSC,
         ATVStd819,
         ATVStdShortInterleaved,
         ATVStdShort,

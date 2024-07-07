@@ -204,30 +204,6 @@ int ATVDemodSettings::getFps(int fpsIndex)
     case 0:
         return 30;
         break;
-    //case 2:
-    //    return 20;
-    //    break;
-    //case 3:
-    //    return 16;
-    //    break;
-    //case 4:
-    //    return 12;
-    //    break;
-    //case 5:
-    //    return 10;
-    //    break;
-    //case 6:
-    //    return 8;
-    //    break;
-    //case 7:
-    //    return 5;
-    //    break;
-    //case 8:
-    //    return 2;
-    //    break;
-    //case 9:
-    //    return 1;
-    //    break;
     case 1:
     default:
         return 25;
@@ -264,45 +240,9 @@ int ATVDemodSettings::getNumberOfLines(int nbLinesIndex)
 {
     switch(nbLinesIndex)
     {
-    //case 0:
-    //    return 819;
-    //    break;
-    //case 1:
-    //    return 640;
-    //    break;
     case 3:
         return 525;
         break;
-    //case 4:
-    //    return 480;
-    //    break;
-    //case 5:
-    //    return 405;
-    //    break;
-    //case 6:
-    //    return 360;
-    //    break;
-    //case 7:
-    //    return 343;
-    //    break;
-    //case 8:
-    //    return 240;
-    //    break;
-    //case 9:
-    //    return 180;
-    //    break;
-    //case 10:
-    //    return 120;
-    //    break;
-    //case 11:
-    //    return 90;
-    //    break;
-    //case 12:
-    //    return 60;
-    //    break;
-    //case 13:
-    //    return 32;
-    //    break;
     case 2:
     default:
         return 625;

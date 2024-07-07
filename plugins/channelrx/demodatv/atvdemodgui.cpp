@@ -511,7 +511,7 @@ void ATVDemodGUI::on_standard_currentIndexChanged(int index)
 {
     m_settings.m_atvStd = (ATVDemodSettings::ATVStd) index;
 
-    if (m_settings.m_atvStd == ATVDemodSettings::ATVStdPAL525)
+    if (m_settings.m_atvStd == ATVDemodSettings::ATVStdNTSC)
     {
         m_settings.m_fps = 30;
         m_settings.m_nbLines = 525;

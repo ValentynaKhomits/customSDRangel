@@ -37,22 +37,14 @@
 
 #include "atvdemodsettings.h"
 
-//const std::vector<double> hilbert_coeffs = {
-//    // Insert the coefficients generated from the Python script here
-//    -0.0033, -0.0027, -0.0012,  0.0016,  0.0056,  0.0108,  0.0170,  0.0240,
-//     0.0313,  0.0385,  0.0452,  0.0508,  0.0547,  0.0563,  0.0550,  0.0506,
-//     0.0427,  0.0312,  0.0160, -0.0023, -0.0226, -0.0434, -0.0632, -0.0807,
-//    -0.0947, -0.1042, -0.1081, -0.1057, -0.0963, -0.0796, -0.0555, -0.0245,
-//     0.0131,  0.0566,  0.1042,  0.1541,  0.2039,  0.2510,  0.2925,  0.3253,
-//     0.3461
-//};
-
 const std::vector<double> hilbert_coeffs = {
-    // These coefficients should be designed for your specific application.
-    // Below is an example of 21-tap Hilbert transformer coefficients
-    -0.0952, -0.0572,  0.0,     0.0632,  0.0952,  0.0632,  0.0,     -0.0572, -0.0952,
-    -0.0572, 0.0,     0.0572,  0.0952,  0.0572,  0.0,     -0.0632, -0.0952, -0.0632,
-    0.0,     0.0572,  0.0952
+    // Insert the coefficients generated from the Python script here
+    -0.0033, -0.0027, -0.0012,  0.0016,  0.0056,  0.0108,  0.0170,  0.0240,
+     0.0313,  0.0385,  0.0452,  0.0508,  0.0547,  0.0563,  0.0550,  0.0506,
+     0.0427,  0.0312,  0.0160, -0.0023, -0.0226, -0.0434, -0.0632, -0.0807,
+    -0.0947, -0.1042, -0.1081, -0.1057, -0.0963, -0.0796, -0.0555, -0.0245,
+     0.0131,  0.0566,  0.1042,  0.1541,  0.2039,  0.2510,  0.2925,  0.3253,
+     0.3461
 };
 
 class ScopeVis;
@@ -234,8 +226,6 @@ private:
     Bandpass<Real> m_bandpass_sig;
     Lowpass<Real> m_lowpass_i_col;
     Lowpass<Real> m_lowpass_q_col;
-    //SimplePhaseLock m_bfoPLL;
-    //SecondOrderRecursiveFilter m_bfoFilter;
 
     // Used for vestigial SSB with asymmetrical filtering (needs double sideband scheme)
     fftfilt* m_DSBFilter;
@@ -347,15 +337,13 @@ private:
 
             m_lineIndex++;
 
+            m_prevLineIndex = m_lineIndex;
+
             if (m_settings.m_atvStd == ATVDemodSettings::ATVStdHSkip) {
                 processEOLHSkip();
             } else {
                 processEOLClassic();
             }
-
-            //videoStandardDetection();
-
-            m_prevLineIndex = m_lineIndex;
         }
 
         prevSample = sample;
@@ -371,7 +359,6 @@ private:
         {
             m_tvScreenBuffer = m_registeredTVScreen->swapBuffers();
         }
-
         if (m_vSyncDetectSampleCount > m_vSyncDetectThreshold &&
             (m_lineIndex < 3 || m_lineIndex > m_numberOfVSyncLines + 1) && m_settings.m_vSync)
         {
@@ -419,10 +406,9 @@ private:
     }
 
     // dont judge me, its only crappy draft i write it at 1 AM (0_o)
-    inline void videoStandardDetection(void)
+    inline void videoStandardDetection(int current_nLine, int previous_nLine)
     {
-        
-        if (((m_prevLineIndex > 310) && (m_lineIndex < 313)) && (m_settings.m_atvStd != m_settings.ATVStdPAL625))
+        if (((previous_nLine > 265) && (current_nLine == 2)) && (m_settings.m_atvStd != m_settings.ATVStdPAL625))
         {
             m_settings.m_atvStd = m_settings.ATVStdPAL625;
             m_settings.m_nbLines = 625;
@@ -436,9 +422,9 @@ private:
                 << "m_fps" << m_settings.m_fps;
 
         }
-        else if (((m_prevLineIndex < 310) && (m_lineIndex < 3)) && (m_settings.m_atvStd != m_settings.ATVStdPAL525))
+        else if (((previous_nLine <= 265) && (current_nLine == 2)) && (m_settings.m_atvStd != m_settings.ATVStdNTSC))
         {
-            m_settings.m_atvStd = m_settings.ATVStdPAL525;
+            m_settings.m_atvStd = m_settings.ATVStdNTSC;
             m_settings.m_nbLines = 525;
             m_settings.m_fps = 30; 
 
