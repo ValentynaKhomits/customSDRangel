@@ -35,6 +35,7 @@
 #include "util/db.h"
 #include "dsp/dspengine.h"
 #include "maincore.h"
+#include "atvdemodsink.h"
 
 #include "atvdemod.h"
 
@@ -532,6 +533,43 @@ void ATVDemodGUI::on_reset_clicked(bool checked)
     resetToDefaults();
 }
 
+const char* m_cmd = "D:\\projects\\sdr_radio\\sdrangel\\external\\windows\\ffmpeg\\bin\\ffmpeg.exe -r 30 -f rawvideo -pix_fmt rgba -s 640x480 -i - "
+                    "-threads 0 -preset fast -y -pix_fmt yuv420p -crf 21 -vf vflip";
+
+void ATVDemodGUI::on_record_clicked(bool checked)
+{
+    char file_name[255] = { 0 };
+    char command_name[512] = { 0 };
+    time_t     now = time(0);
+    struct tm  tstruct;
+    tstruct = *localtime(&now);
+
+    snprintf(file_name, 255, "%s video-%02d-%02d-%4d-%02d-%02d-%02d-%lld.mp4",
+        m_cmd,
+        tstruct.tm_mday, tstruct.tm_mon, (int)(1900U + tstruct.tm_year),
+        tstruct.tm_hour, tstruct.tm_min, tstruct.tm_sec,
+        m_deviceCenterFrequency);
+
+    if (checked)
+    {
+        qDebug() << "Recording is started" << file_name;
+
+        m_settings.m_file = _popen(file_name, "wb");
+        m_atvDemod->setFileHandler(m_settings.m_file);
+        m_atvDemod->setRecordState(checked);
+    }
+    else
+    {
+        qDebug() << "Recording is stop";
+        m_atvDemod->setRecordState(checked);
+
+        if (m_settings.m_file != NULL)
+        {
+            _pclose(m_settings.m_file);
+        }
+    }
+}
+
 void ATVDemodGUI::on_modulation_currentIndexChanged(int index)
 {
     m_settings.m_atvModulation = (ATVDemodSettings::ATVModulation) index;
@@ -652,6 +690,7 @@ void ATVDemodGUI::makeUIConnections()
     QObject::connect(ui->fps, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_fps_currentIndexChanged);
     QObject::connect(ui->standard, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_standard_currentIndexChanged);
     QObject::connect(ui->reset, &QPushButton::clicked, this, &ATVDemodGUI::on_reset_clicked);
+    QObject::connect(ui->record, &QPushButton::clicked, this, &ATVDemodGUI::on_record_clicked);
 //    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &ATVDemodGUI::on_rfBW_valueChanged);
 //    QObject::connect(ui->rfOppBW, &QSlider::valueChanged, this, &ATVDemodGUI::on_rfOppBW_valueChanged);
 //    QObject::connect(ui->rfFiltering, &ButtonSwitch::toggled, this, &ATVDemodGUI::on_rfFiltering_toggled);

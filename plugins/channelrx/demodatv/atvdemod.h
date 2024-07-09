@@ -98,6 +98,8 @@ public:
     double getMagSq() const { return m_basebandSink->getMagSq(); } //!< Beware this is scaled to 2^30
     bool getBFOLocked() { return m_basebandSink->getBFOLocked(); }
     void setVideoTabIndex(int videoTabIndex) { m_basebandSink->setVideoTabIndex(videoTabIndex); }
+    void setFileHandler(FILE* p_file) { if(p_file != NULL) m_basebandSink->setFileHandler(p_file); }
+    void setRecordState(bool state) { m_basebandSink->setRecordState(state); }
     uint32_t getNumberOfDeviceStreams() const;
 
     static const char* const m_channelIdURI;
