@@ -40,7 +40,6 @@
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgConfigureHackRF, Message)
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgReportHackRF, Message)
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(HackRFInput::MsgStartStopFr, Message)
 
 HackRFInput::HackRFInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -52,7 +51,7 @@ HackRFInput::HackRFInput(DeviceAPI *deviceAPI) :
 {
     m_sampleFifo.setLabel(m_deviceDescription);
     openDevice();
-
+    readFrequencyFile();
     m_deviceAPI->setNbSourceStreams(1);
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
 
@@ -246,7 +245,8 @@ quint64 HackRFInput::getCenterFrequency() const
 }
 
 void HackRFInput::setCenterFrequency(qint64 centerFrequency)
-{
+{   
+    qDebug("HackRFInput::Set center frequency! %i", centerFrequency/1000);
     HackRFInputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
@@ -258,6 +258,15 @@ void HackRFInput::setCenterFrequency(qint64 centerFrequency)
         MsgConfigureHackRF* messageToGUI = MsgConfigureHackRF::create(settings, QList<QString>{"centerFrequency"}, false);
         m_guiMessageQueue->push(messageToGUI);
     }
+}
+
+void HackRFInput::switchFrequency()
+{
+    qDebug("HackRFInput::switchFrequency called !");
+    static int iter = 0;
+    setCenterFrequency(m_frequencyValues.at(iter));
+    iter++;
+    if (iter == m_frequencyValues.size()) { iter = 0; }
 }
 
 bool HackRFInput::handleMessage(const Message& message)
@@ -295,21 +304,6 @@ bool HackRFInput::handleMessage(const Message& message)
             webapiReverseSendStartStop(cmd.getStartStop());
         }
 
-        return true;
-    }
-    else if (MsgStartStopFr::match(message))
-    {
-        MsgStartStopFr& cmd = (MsgStartStopFr&)message;
-        qDebug() << "HackRFInput::handleMessage: MsgStartStopFr: " << (cmd.getStartStop() ? "start" : "stop");
-
-        if (cmd.getStartStop())
-        {
-            //continue change frequency
-        }
-        else
-        {
-            //stop change frequency
-        }
         return true;
     }
     else if (DeviceHackRFShared::MsgSynchronizeFrequency::match(message))

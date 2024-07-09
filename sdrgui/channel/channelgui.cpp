@@ -150,14 +150,14 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_topLayout = new QHBoxLayout();
     m_topLayout->setContentsMargins(0, 0, 0, 0);
     m_topLayout->addWidget(m_indexLabel);
-    m_topLayout->addWidget(m_settingsButton);
+  //  m_topLayout->addWidget(m_settingsButton);
     m_topLayout->addWidget(m_titleLabel);
     // m_topLayout->addStretch(1);
-    m_topLayout->addWidget(m_helpButton);
-    m_topLayout->addWidget(m_moveButton);
-    m_topLayout->addWidget(m_shrinkButton);
-    m_topLayout->addWidget(m_maximizeButton);
-    m_topLayout->addWidget(m_hideButton);
+   // m_topLayout->addWidget(m_helpButton);
+  //  m_topLayout->addWidget(m_moveButton);
+  //  m_topLayout->addWidget(m_shrinkButton);
+  //  m_topLayout->addWidget(m_maximizeButton);
+  //  m_topLayout->addWidget(m_hideButton);
     m_topLayout->addWidget(m_closeButton);
 
     m_centerLayout = new QHBoxLayout();
@@ -167,8 +167,8 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
 
     m_bottomLayout = new QHBoxLayout();
     m_bottomLayout->setContentsMargins(0, 0, 0, 0);
-    m_bottomLayout->addWidget(m_duplicateButton);
-    m_bottomLayout->addWidget(m_moveToDeviceButton);
+   // m_bottomLayout->addWidget(m_duplicateButton);
+   // m_bottomLayout->addWidget(m_moveToDeviceButton);
     m_bottomLayout->addWidget(m_statusFrequency);
     m_bottomLayout->addWidget(m_statusLabel);
     m_sizeGripBottomRight = new QSizeGrip(this);
@@ -184,16 +184,16 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     QObjectCleanupHandler().add(layout());
     setLayout(m_layouts);
 
-    connect(m_settingsButton, SIGNAL(clicked()), this, SLOT(activateSettingsDialog()));
-    connect(m_helpButton, SIGNAL(clicked()), this, SLOT(showHelp()));
-    connect(m_moveButton, SIGNAL(clicked()), this, SLOT(openMoveToWorkspaceDialog()));
-    connect(m_shrinkButton, SIGNAL(clicked()), this, SLOT(shrinkWindow()));
-    connect(m_maximizeButton, SIGNAL(clicked()), this, SLOT(maximizeWindow()));
-    connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
-    connect(m_hideButton, SIGNAL(clicked()), this, SLOT(hide()));
+    //connect(m_settingsButton, SIGNAL(clicked()), this, SLOT(activateSettingsDialog()));
+   // connect(m_helpButton, SIGNAL(clicked()), this, SLOT(showHelp()));
+  //  connect(m_moveButton, SIGNAL(clicked()), this, SLOT(openMoveToWorkspaceDialog()));
+   // connect(m_shrinkButton, SIGNAL(clicked()), this, SLOT(shrinkWindow()));
+  //  connect(m_maximizeButton, SIGNAL(clicked()), this, SLOT(maximizeWindow()));
+   // connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
+   // connect(m_hideButton, SIGNAL(clicked()), this, SLOT(hide()));
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(close()));
-    connect(m_duplicateButton, SIGNAL(clicked()), this, SLOT(duplicateChannel()));
-    connect(m_moveToDeviceButton, SIGNAL(clicked()), this, SLOT(openMoveToDeviceSetDialog()));
+   // connect(m_duplicateButton, SIGNAL(clicked()), this, SLOT(duplicateChannel()));
+   // connect(m_moveToDeviceButton, SIGNAL(clicked()), this, SLOT(openMoveToDeviceSetDialog()));
 
     connect(
         m_rollupContents,
@@ -213,14 +213,7 @@ ChannelGUI::~ChannelGUI()
     delete m_layouts;
     delete m_statusLabel;
     delete m_statusFrequency;
-    delete m_moveToDeviceButton;
-    delete m_duplicateButton;
     delete m_closeButton;
-    delete m_hideButton;
-    delete m_shrinkButton;
-    delete m_maximizeButton;
-    delete m_moveButton;
-    delete m_helpButton;
     delete m_titleLabel;
     delete m_settingsButton;
     delete m_indexLabel;

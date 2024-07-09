@@ -62,7 +62,9 @@ HackRFInputGui::HackRFInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
+    connect(&m_freqTimer, SIGNAL(timeout()), m_sampleSource, SLOT(switchFrequency()));
 	m_statusTimer.start(500);
+    m_freqTimer.start(2000);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
@@ -82,6 +84,7 @@ HackRFInputGui::~HackRFInputGui()
     qDebug("HackRFInputGui::~HackRFInputGui");
     m_statusTimer.stop();
     m_updateTimer.stop();
+    m_freqTimer.stop();
 	delete ui;
     qDebug("HackRFInputGui::~HackRFInputGui: end");
 }
@@ -147,15 +150,6 @@ bool HackRFInputGui::handleMessage(const Message& message)
         HackRFInput::MsgStartStop& notif = (HackRFInput::MsgStartStop&) message;
         blockApplySettings(true);
         ui->startStop->setChecked(notif.getStartStop());
-        blockApplySettings(false);
-
-        return true;
-    }
-    else if (HackRFInput::MsgStartStopFr::match(message))
-    {
-        HackRFInput::MsgStartStopFr& notif = (HackRFInput::MsgStartStopFr&)message;
-        blockApplySettings(true);
-        ui->startStopFr->setChecked(notif.getStartStop());
         blockApplySettings(false);
 
         return true;
@@ -476,10 +470,11 @@ void HackRFInputGui::on_startStop_toggled(bool checked)
 }
 void HackRFInputGui::on_startStopFr_toggled(bool checked)
 {
-    if (m_doApplySettings)
-    {
-        HackRFInput::MsgStartStopFr* message = HackRFInput::MsgStartStopFr::create(checked);
-        m_sampleSource->getInputMessageQueue()->push(message);
+    if (checked) {
+        m_freqTimer.stop();
+    }
+    else {
+        m_freqTimer.start(2000);
     }
 }
 

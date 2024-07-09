@@ -104,24 +104,6 @@ public:
         { }
     };
 
-    class MsgStartStopFr : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        bool getStartStop() const { return m_startStop; }
-
-        static MsgStartStopFr* create(bool startStop) {
-            return new MsgStartStopFr(startStop);
-        }
-
-    protected:
-        bool m_startStop;
-
-        MsgStartStopFr(bool startStop) :
-            Message(),
-            m_startStop(startStop)
-        { }
-    };
 	HackRFInput(DeviceAPI *deviceAPI);
 	virtual ~HackRFInput();
 	virtual void destroy();
@@ -139,6 +121,7 @@ public:
     virtual void setSampleRate(int sampleRate) { (void) sampleRate; }
 	virtual quint64 getCenterFrequency() const;
     QVector<quint64>& readFrequencyFile();
+    virtual void switchFrequency();
     virtual void setCenterFrequency(qint64 centerFrequency);
 
 	virtual bool handleMessage(const Message& message);

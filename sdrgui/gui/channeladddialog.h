@@ -43,12 +43,12 @@ public:
     void resetChannelNames();
     void addChannelNames(const QStringList& channelNames);
 
+    void apply(QAbstractButton*);
 private:
     Ui::ChannelAddDialog* ui;
     std::vector<int> m_channelIndexes;
 
 private slots:
-    void apply(QAbstractButton*);
 
 signals:
     void addChannel(int channelPluginIndex);

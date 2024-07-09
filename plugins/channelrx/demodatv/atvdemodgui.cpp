@@ -325,6 +325,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     triggerData.m_triggerPositiveEdge = false;
     ui->scopeGUI->changeTrigger(0, triggerData);
     ui->scopeGUI->focusOnTrigger(0); // re-focus to take changes into account in the GUI
+    ui->screenTabWidget->setTabEnabled(1, false);//ui->scopeGUI->setVisible(false);
 
     connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
@@ -660,7 +661,7 @@ void ATVDemodGUI::makeUIConnections()
 //////    QObject::connect(ui->fmDeviation, &QDial::valueChanged, this, &ATVDemodGUI::on_fmDeviation_valueChanged);
 //    QObject::connect(ui->amScaleFactor, &QDial::valueChanged, this, &ATVDemodGUI::on_amScaleFactor_valueChanged);
 //    QObject::connect(ui->amScaleOffset, &QDial::valueChanged, this, &ATVDemodGUI::on_amScaleOffset_valueChanged);
-    QObject::connect(ui->screenTabWidget, &QTabWidget::currentChanged, this, &ATVDemodGUI::on_screenTabWidget_currentChanged);
+  //  QObject::connect(ui->screenTabWidget, &QTabWidget::currentChanged, this, &ATVDemodGUI::on_screenTabWidget_currentChanged);
 }
 
 void ATVDemodGUI::updateAbsoluteCenterFrequency()

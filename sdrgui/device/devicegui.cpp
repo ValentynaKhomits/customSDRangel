@@ -361,7 +361,8 @@ void DeviceGUI::openMoveToWorkspaceDialog()
 
 void DeviceGUI::openAddChannelsDialog()
 {
-    m_channelAddDialog.exec();
+    m_channelAddDialog.apply(nullptr);
+    //m_channelAddDialog.exec();
 }
 
 void DeviceGUI::showSpectrumHandler()
