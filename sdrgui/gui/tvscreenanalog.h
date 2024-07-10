@@ -130,6 +130,9 @@ class SDRGUI_API TVScreenAnalog : public QOpenGLWidget, protected QOpenGLFunctio
 	int m_vertexAttribIndex;
 	int m_texCoordAttribIndex;
 	bool m_recording;
+	int m_videoWidth;
+	int m_videoHeight;
+
 
 	QMutex m_buffersMutex;
 	TVScreenAnalogBuffer *m_frontBuffer;

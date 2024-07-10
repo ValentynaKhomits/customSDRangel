@@ -562,14 +562,14 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>560</width>
-          <height>420</height>
+          <width>640</width>
+          <height>480</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>560</width>
-          <height>420</height>
+          <width>640</width>
+          <height>480</height>
          </size>
         </property>
         <property name="styleSheet">

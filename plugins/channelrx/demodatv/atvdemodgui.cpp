@@ -533,7 +533,7 @@ void ATVDemodGUI::on_reset_clicked(bool checked)
     resetToDefaults();
 }
 
-const char* m_cmd = "D:\\projects\\sdr_radio\\sdrangel\\external\\windows\\ffmpeg\\bin\\ffmpeg.exe -r 30 -f rawvideo -pix_fmt rgba -s 640x480 -i - "
+const char* m_cmd = "D:\\projects\\sdr_radio\\sdrangel\\external\\windows\\ffmpeg\\bin\\ffmpeg.exe -r 25 -f rawvideo -pix_fmt rgba -s 640x480 -i - "
                     "-threads 0 -preset fast -y -pix_fmt yuv420p -crf 21 -vf vflip";
 
 void ATVDemodGUI::on_record_clicked(bool checked)
@@ -544,7 +544,7 @@ void ATVDemodGUI::on_record_clicked(bool checked)
     struct tm  tstruct;
     tstruct = *localtime(&now);
 
-    snprintf(file_name, 255, "%s video-%02d-%02d-%4d-%02d-%02d-%02d-%lld.mp4",
+    snprintf(file_name, 255, "%s video-%02d-%02d-%4d-%02d-%02d-%02d-%lldHz.mp4",
         m_cmd,
         tstruct.tm_mday, tstruct.tm_mon, (int)(1900U + tstruct.tm_year),
         tstruct.tm_hour, tstruct.tm_min, tstruct.tm_sec,
