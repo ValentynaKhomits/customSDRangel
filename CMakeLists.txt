@@ -1057,6 +1057,7 @@ if(WIN32)
   windeployqt(${CMAKE_PROJECT_NAME} ${SDRANGEL_BINARY_BIN_DIR} ${PROJECT_SOURCE_DIR}/sdrgui/resources)
 endif()
 configure_file(${CMAKE_SOURCE_DIR}/settings/frequency.txt ${SDRANGEL_BINARY_BIN_DIR}/frequency.txt COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/external/windows/ffmpeg/bin/ffmpeg.exe ${SDRANGEL_BINARY_BIN_DIR}/ffmpeg.exe COPYONLY)
 # Install debug symbols
 if (WIN32)
   install(FILES $<TARGET_PDB_FILE:${CMAKE_PROJECT_NAME}> CONFIGURATIONS Debug RelWithDebInfo DESTINATION ${INSTALL_BIN_DIR} )

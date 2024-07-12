@@ -125,19 +125,19 @@ TVScreenAnalog::TVScreenAnalog(QWidget *parent)	:
 	m_frontBuffer = new TVScreenAnalogBuffer(5, 1);
 	m_backBuffer = new TVScreenAnalogBuffer(5, 1);
 
-    m_videoWidth = 640U;
-    m_videoHeight = 480U;
+    m_videoWidth = 560;
+    m_videoHeight = 420;
     m_recording = false;
 
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(tick()));
-	m_updateTimer.start(40); // capped at 25 FPS
+	m_updateTimer.start(20); // capped at 25 FPS
 }
 
 TVScreenAnalog::~TVScreenAnalog()
 {
 	delete m_backBuffer;
 	delete m_frontBuffer;
-    delete img_buffer;
+    delete m_img_buffer;
 }
 
 void TVScreenAnalog::cleanup()
@@ -287,7 +287,7 @@ void TVScreenAnalog::initializeGL()
 
 void TVScreenAnalog::initializeTextures(TVScreenAnalogBuffer *buffer)
 {
-    img_buffer = new int[m_videoWidth * m_videoHeight];
+    m_img_buffer = new int[m_videoWidth * m_videoHeight];
 
 	m_imageTexture = new QOpenGLTexture(QOpenGLTexture::Target2D);
 	m_lineShiftsTexture = new QOpenGLTexture(QOpenGLTexture::Target2D);
@@ -415,9 +415,9 @@ void TVScreenAnalog::paintGL()
     {
         if (m_file != NULL)
         {
-            glReadPixels(0, 0, m_videoWidth, m_videoHeight, GL_RGBA, GL_UNSIGNED_BYTE, img_buffer);
+            glReadPixels(0, 0, m_videoWidth, m_videoHeight, GL_RGBA, GL_UNSIGNED_BYTE, m_img_buffer);
 
-            fwrite(img_buffer, sizeof(int) * m_videoWidth * m_videoHeight, 1, m_file);
+            fwrite(m_img_buffer, sizeof(int) * m_videoWidth * m_videoHeight, 1, m_file);
         }
     }
 

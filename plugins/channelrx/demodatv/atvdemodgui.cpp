@@ -39,6 +39,11 @@
 
 #include "atvdemod.h"
 
+#define ATV_REC_STRING_SIZE   (255)
+#define ATV_REC_STRING_FORMAT "%s video-%02d-%02d-%4d-%02d-%02d-%02d-%lldHz.mp4"
+#define ATV_REC_CMD_STRING    "ffmpeg.exe -r 20 -f rawvideo -pix_fmt rgba -s 560x420 -i - " \
+                              "-threads 0 -preset fast -y -pix_fmt yuv420p -crf 21 -vf vflip"
+
 ATVDemodGUI* ATVDemodGUI::create(PluginAPI* objPluginAPI,
         DeviceUISet *deviceUISet,
         BasebandSampleSink *rxChannel)
@@ -533,25 +538,21 @@ void ATVDemodGUI::on_reset_clicked(bool checked)
     resetToDefaults();
 }
 
-const char* m_cmd = "D:\\projects\\sdr_radio\\sdrangel\\external\\windows\\ffmpeg\\bin\\ffmpeg.exe -r 25 -f rawvideo -pix_fmt rgba -s 640x480 -i - "
-                    "-threads 0 -preset fast -y -pix_fmt yuv420p -crf 21 -vf vflip";
-
 void ATVDemodGUI::on_record_clicked(bool checked)
 {
-    char file_name[255] = { 0 };
-    char command_name[512] = { 0 };
-    time_t     now = time(0);
-    struct tm  tstruct = *localtime(&now);
+    char file_name[ATV_REC_STRING_SIZE] = { 0 };
+    time_t now = time(0);
+    struct tm tstruct = *localtime(&now);
 
-    snprintf(file_name, 255, "%s video-%02d-%02d-%4d-%02d-%02d-%02d-%lldHz.mp4",
-        m_cmd,
+    snprintf(file_name, 255, ATV_REC_STRING_FORMAT,
+        ATV_REC_CMD_STRING,
         tstruct.tm_mday, tstruct.tm_mon, (int)(1900U + tstruct.tm_year),
         tstruct.tm_hour, tstruct.tm_min, tstruct.tm_sec,
         m_deviceCenterFrequency);
 
     if (checked)
     {
-        qDebug() << "Recording is started" << file_name;
+        qDebug() << "Recording is started";
 
         m_settings.m_file = _popen(file_name, "wb");
         m_atvDemod->setFileHandler(m_settings.m_file);

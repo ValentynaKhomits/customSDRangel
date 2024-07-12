@@ -144,7 +144,7 @@ class SDRGUI_API TVScreenAnalog : public QOpenGLWidget, protected QOpenGLFunctio
     QOpenGLBuffer *m_textureCoordsBuf;
 	QOpenGLTexture *m_imageTexture;
 	QOpenGLTexture *m_lineShiftsTexture;
-	int* img_buffer;
+	int* m_img_buffer;
 
 public:
 	TVScreenAnalog(QWidget *parent);

@@ -516,12 +516,12 @@ void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
             // Update NCO freq and filters settings after change config
             m_nco_col.setFreq(m_chroma_subcarrier_freq, m_channelSampleRate);
 
-            m_bandpass_sig.create(15, m_channelSampleRate,
+            m_bandpass_sig.create(3, m_channelSampleRate,
                 m_chroma_subcarrier_freq - m_chroma_subcarrier_bw_lsb,
                 m_chroma_subcarrier_freq + m_chroma_subcarrier_bw_usb);
 
-            m_lowpass_i_col.create(15, m_channelSampleRate, 1500000.0f);
-            m_lowpass_q_col.create(15, m_channelSampleRate, 1500000.0f);
+            m_lowpass_i_col.create(3, m_channelSampleRate, 1500000.0f);
+            m_lowpass_q_col.create(3, m_channelSampleRate, 1500000.0f);
         }
 
         if (m_registeredTVScreen)
