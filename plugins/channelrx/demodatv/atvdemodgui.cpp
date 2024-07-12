@@ -541,8 +541,7 @@ void ATVDemodGUI::on_record_clicked(bool checked)
     char file_name[255] = { 0 };
     char command_name[512] = { 0 };
     time_t     now = time(0);
-    struct tm  tstruct;
-    tstruct = *localtime(&now);
+    struct tm  tstruct = *localtime(&now);
 
     snprintf(file_name, 255, "%s video-%02d-%02d-%4d-%02d-%02d-%02d-%lldHz.mp4",
         m_cmd,
@@ -690,7 +689,7 @@ void ATVDemodGUI::makeUIConnections()
     QObject::connect(ui->fps, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_fps_currentIndexChanged);
     QObject::connect(ui->standard, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ATVDemodGUI::on_standard_currentIndexChanged);
     QObject::connect(ui->reset, &QPushButton::clicked, this, &ATVDemodGUI::on_reset_clicked);
-    QObject::connect(ui->record, &QPushButton::clicked, this, &ATVDemodGUI::on_record_clicked);
+    QObject::connect(ui->record, &ButtonSwitch::toggled, this, &ATVDemodGUI::on_record_clicked);
 //    QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &ATVDemodGUI::on_rfBW_valueChanged);
 //    QObject::connect(ui->rfOppBW, &QSlider::valueChanged, this, &ATVDemodGUI::on_rfOppBW_valueChanged);
 //    QObject::connect(ui->rfFiltering, &ButtonSwitch::toggled, this, &ATVDemodGUI::on_rfFiltering_toggled);

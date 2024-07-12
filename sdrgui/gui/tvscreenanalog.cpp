@@ -125,7 +125,7 @@ TVScreenAnalog::TVScreenAnalog(QWidget *parent)	:
 	m_frontBuffer = new TVScreenAnalogBuffer(5, 1);
 	m_backBuffer = new TVScreenAnalogBuffer(5, 1);
 
-    m_videoWidth = 720U;
+    m_videoWidth = 640U;
     m_videoHeight = 480U;
     m_recording = false;
 

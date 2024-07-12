@@ -289,6 +289,28 @@
         <property name="text">
          <string>Half</string>
         </property>
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="record">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Record button</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/play.png</normaloff>
+          <normalon>:/stop.png</normalon>:/play.png
+         </iconset>
+        </property>
        </widget>
       </item>
       <item>
@@ -317,25 +339,6 @@
         </property>
         <property name="text">
          <string>R</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="record">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="toolTip">
-          <string>Record button</string>
-        </property>
-        <property name="text">
-          <string>R</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
         </property>
        </widget>
       </item>
