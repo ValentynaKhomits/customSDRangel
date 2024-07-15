@@ -50,28 +50,30 @@ HackRFInputGui::HackRFInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_sampleSource = (HackRFInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
+    readFrequencyFile();
+
     ui->setupUi(getContents());
     sizeToContents();
     getContents()->setStyleSheet("#HackRFInputGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesource/hackrfinput/readme.md";
-	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->centerFrequency->setValueRange(7, 0U, 9999999U);
+    ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->centerFrequency->setValueRange(7, 0U, 9999999U);
 
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(8, 1000000U, 20000000U);
 
-	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
-	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
-    connect(&m_freqTimer, SIGNAL(timeout()), m_sampleSource, SLOT(switchFrequency()));
-	m_statusTimer.start(500);
-    m_freqTimer.start(2000);
+    connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
+    connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
+    connect(&m_freqTimer, &QTimer::timeout, this, &HackRFInputGui::switchFrequency);
+
+    m_statusTimer.start(500);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
-	displaySettings();
-	displayBandwidths();
+    displaySettings();
+    displayBandwidths();
 
-	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 
     sendSettings();
@@ -389,6 +391,15 @@ void HackRFInputGui::on_centerFrequency_changed(quint64 value)
 	sendSettings();
 }
 
+void HackRFInputGui::on_centerFrequency_update(quint64 value)
+{
+    m_settings.m_centerFrequency = value;
+    m_settingsKeys.append("centerFrequency");
+    ui->centerFrequency->setValue(value);
+    ui->centerFrequency->changed(value/1000);
+    sendSettings();
+}
+
 void HackRFInputGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_devSampleRate = value;
@@ -460,6 +471,39 @@ void HackRFInputGui::on_vga_valueChanged(int value)
 	sendSettings();
 }
 
+void HackRFInputGui::readFrequencyFile()
+{
+    QFile file("frequency.txt");
+    if (file.open(QFile::ReadOnly)) {
+        char buf[1024];
+        qint64 lineLength = file.readLine(buf, sizeof(buf));
+        if (lineLength != -1) {
+            m_frequencyValues.clear();
+            QString frSeq = QString::fromLocal8Bit(buf);
+            qDebug() << "HackRFInput::readFile: Frequency sequence:" << frSeq;
+            QStringList list = frSeq.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+            for (const auto& i : list)
+            {
+                qDebug() << "current frequency::readFile" << i;
+                m_frequencyValues.push_back(static_cast<quint64>(i.toULongLong()));
+                qDebug() << "current frequency::readFile" << m_frequencyValues.last();
+            }
+        }
+        else {
+            qCritical("HackRFInput::readFile: Cannot read file: %s", file.fileName());
+        }
+    }
+}
+
+void HackRFInputGui::switchFrequency()
+{
+    qDebug("HackRFInputGui::switchFrequency called !");
+    static int iter = 0;
+    on_centerFrequency_update(m_frequencyValues.at(iter));
+    iter++;
+    if (iter == m_frequencyValues.size()) { iter = 0; }
+}
+
 void HackRFInputGui::on_startStop_toggled(bool checked)
 {
     if (m_doApplySettings)
@@ -471,10 +515,10 @@ void HackRFInputGui::on_startStop_toggled(bool checked)
 void HackRFInputGui::on_startStopFr_toggled(bool checked)
 {
     if (checked) {
-        m_freqTimer.stop();
+        m_freqTimer.start(2000);
     }
     else {
-        m_freqTimer.start(2000);
+        m_freqTimer.stop();
     }
 }
 

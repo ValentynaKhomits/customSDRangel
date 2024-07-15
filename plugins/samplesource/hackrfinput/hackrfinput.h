@@ -120,8 +120,7 @@ public:
 	virtual int getSampleRate() const;
     virtual void setSampleRate(int sampleRate) { (void) sampleRate; }
 	virtual quint64 getCenterFrequency() const;
-    QVector<quint64>& readFrequencyFile();
-    virtual void switchFrequency();
+ 
     virtual void setCenterFrequency(qint64 centerFrequency);
 
 	virtual bool handleMessage(const Message& message);
@@ -165,7 +164,6 @@ private:
 	bool m_running;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
-    QVector<quint64> m_frequencyValues;
 
     bool openDevice();
     void closeDevice();

@@ -51,7 +51,6 @@ HackRFInput::HackRFInput(DeviceAPI *deviceAPI) :
 {
     m_sampleFifo.setLabel(m_deviceDescription);
     openDevice();
-    readFrequencyFile();
     m_deviceAPI->setNbSourceStreams(1);
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
 
@@ -260,15 +259,6 @@ void HackRFInput::setCenterFrequency(qint64 centerFrequency)
     }
 }
 
-void HackRFInput::switchFrequency()
-{
-    qDebug("HackRFInput::switchFrequency called !");
-    static int iter = 0;
-    setCenterFrequency(m_frequencyValues.at(iter));
-    iter++;
-    if (iter == m_frequencyValues.size()) { iter = 0; }
-}
-
 bool HackRFInput::handleMessage(const Message& message)
 {
 	if (MsgConfigureHackRF::match(message))
@@ -338,29 +328,6 @@ bool HackRFInput::handleMessage(const Message& message)
 	{
 		return false;
 	}
-}
-
-QVector<quint64>& HackRFInput::readFrequencyFile()
-{
-    QFile file("frequency.txt");
-    if (file.open(QFile::ReadOnly)) {
-        char buf[1024];
-        qint64 lineLength = file.readLine(buf, sizeof(buf));
-        if (lineLength != -1) {
-            m_frequencyValues.clear();
-            QString frSeq = QString::fromLocal8Bit(buf);
-            qDebug("HackRFInput::readFile: Frequency sequence: %s", frSeq);
-            QStringList list = frSeq.split(QRegExp("\\s+"), QString::SkipEmptyParts);
-            for (const auto& i : list)
-            {
-                m_frequencyValues.push_back(static_cast<quint64>(i.toULongLong()));
-            }
-        }
-        else {
-            qCritical("HackRFInput::readFile: Cannot read file: %s", file.fileName());
-        }
-    }
-    return m_frequencyValues;
 }
 
 void HackRFInput::setDeviceCenterFrequency(quint64 freq_hz, int loPpmTenths)
