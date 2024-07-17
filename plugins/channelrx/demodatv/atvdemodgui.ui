@@ -348,6 +348,9 @@
      <layout class="QGridLayout" name="slidersLayout">
       <item row="0" column="1">
        <widget class="QSlider" name="synchLevel">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
         <property name="toolTip">
          <string>Horizontal synchronization level</string>
         </property>
@@ -370,6 +373,9 @@
       </item>
       <item row="0" column="2">
        <widget class="QLabel" name="synchLevelText">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
         <property name="toolTip">
          <string>Horizontal synchronization level value</string>
         </property>
@@ -383,6 +389,9 @@
       </item>
       <item row="0" column="0">
        <widget class="QLabel" name="synchLevelLabel">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Synch&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
@@ -403,6 +412,9 @@
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="blackLevelLabel">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Black Lvl&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
@@ -410,6 +422,9 @@
       </item>
       <item row="1" column="1">
        <widget class="QSlider" name="blackLevel">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
         <property name="toolTip">
          <string>Black level</string>
         </property>
@@ -432,6 +447,9 @@
       </item>
       <item row="1" column="2">
        <widget class="QLabel" name="blackLevelText">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
         <property name="toolTip">
          <string>Black level value</string>
         </property>

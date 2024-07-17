@@ -195,12 +195,12 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
    // connect(m_duplicateButton, SIGNAL(clicked()), this, SLOT(duplicateChannel()));
    // connect(m_moveToDeviceButton, SIGNAL(clicked()), this, SLOT(openMoveToDeviceSetDialog()));
 
-    connect(
-        m_rollupContents,
-        &RollupContents::widgetRolled,
-        this,
-        &ChannelGUI::onWidgetRolled
-    );
+    //connect(
+    //    m_rollupContents,
+    //    &RollupContents::widgetRolled,
+    //    this,
+    //    &ChannelGUI::onWidgetRolled
+    //);
 }
 
 ChannelGUI::~ChannelGUI()

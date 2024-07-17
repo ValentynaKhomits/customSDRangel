@@ -183,12 +183,12 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(close()));
 
-    QObject::connect(
-        &m_channelAddDialog,
-        &ChannelAddDialog::addChannel,
-        this,
-        &DeviceGUI::addChannelEmitted
-    );
+    //QObject::connect(
+    //    &m_channelAddDialog,
+    //    &ChannelAddDialog::addChannel,
+    //    this,
+    //    &DeviceGUI::addChannelEmitted
+    //);
 }
 
 DeviceGUI::~DeviceGUI()
@@ -361,8 +361,11 @@ void DeviceGUI::openMoveToWorkspaceDialog()
 
 void DeviceGUI::openAddChannelsDialog()
 {
-    m_channelAddDialog.apply(nullptr);
+    //m_channelAddDialog.apply(nullptr);
     //m_channelAddDialog.exec();
+
+    //m_channelAddDialog.addChannel(0);
+    addChannelEmitted(0);
 }
 
 void DeviceGUI::showSpectrumHandler()

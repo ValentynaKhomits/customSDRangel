@@ -47,5 +47,5 @@ void ChannelAddDialog::addChannelNames(const QStringList& channelNames)
 
 void ChannelAddDialog::apply(QAbstractButton *button)
 {
-        emit(addChannel(0));
+    emit(addChannel(0));
 }
