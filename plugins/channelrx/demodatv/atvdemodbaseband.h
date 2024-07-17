@@ -75,6 +75,8 @@ public:
     void setBasebandSampleRate(int sampleRate); //!< To be used when supporting thread is stopped
     bool isRunning() const { return m_running; }
     void setFifoLabel(const QString& label) { m_sampleFifo.setLabel(label); }
+    void setFileHandler(FILE* p_file) { if (p_file != NULL) m_sink.setFileHandler(p_file); }
+    void setRecordState(bool state) { m_sink.setRecordState(state); }
 
 private:
     SampleSinkFifo m_sampleFifo;

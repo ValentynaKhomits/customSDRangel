@@ -84,6 +84,8 @@ struct ATVDemodSettings
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
     bool m_hidden;
+    FILE* m_file;   // file handler
+    bool m_recording;
 
     ATVDemodSettings();
     void resetToDefaults();

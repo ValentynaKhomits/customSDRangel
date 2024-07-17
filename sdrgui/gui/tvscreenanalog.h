@@ -129,6 +129,10 @@ class SDRGUI_API TVScreenAnalog : public QOpenGLWidget, protected QOpenGLFunctio
 	int m_texelHeightLoc;
 	int m_vertexAttribIndex;
 	int m_texCoordAttribIndex;
+	bool m_recording;
+	int m_videoWidth;
+	int m_videoHeight;
+
 
 	QMutex m_buffersMutex;
 	TVScreenAnalogBuffer *m_frontBuffer;
@@ -140,14 +144,18 @@ class SDRGUI_API TVScreenAnalog : public QOpenGLWidget, protected QOpenGLFunctio
     QOpenGLBuffer *m_textureCoordsBuf;
 	QOpenGLTexture *m_imageTexture;
 	QOpenGLTexture *m_lineShiftsTexture;
+	int* m_img_buffer;
 
 public:
 	TVScreenAnalog(QWidget *parent);
 	~TVScreenAnalog();
 
+	FILE* m_file;
+
 	TVScreenAnalogBuffer *getBackBuffer();
 	TVScreenAnalogBuffer *swapBuffers();
 	void resizeTVScreen(int intCols, int intRows);
+	void setRecordState(bool state) { m_recording = state; }
 
 private:
 	void initializeTextures(TVScreenAnalogBuffer *buffer);

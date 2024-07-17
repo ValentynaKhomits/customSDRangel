@@ -65,6 +65,8 @@ public:
     double getMagSq() const { return m_magSqAverage; } //!< Beware this is scaled to 2^30
     bool getBFOLocked();
     void setVideoTabIndex(int videoTabIndex) { m_videoTabIndex = videoTabIndex; }
+    void setFileHandler(FILE* p_file) { if (p_file != NULL) m_registeredTVScreen->m_file = p_file; }
+    void setRecordState(bool state) { m_registeredTVScreen->setRecordState(state); }
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void applySettings(const ATVDemodSettings& settings, bool force = false);
@@ -405,7 +407,6 @@ private:
         m_tvScreenBuffer->selectRow(m_lineIndex, m_sampleOffsetFrac);
     }
 
-    // dont judge me, its only crappy draft i write it at 1 AM (0_o)
     inline void videoStandardDetection(int current_nLine, int previous_nLine)
     {
         if (((previous_nLine > 265) && (current_nLine == 2)) && (m_settings.m_atvStd != m_settings.ATVStdPAL625))

@@ -125,14 +125,19 @@ TVScreenAnalog::TVScreenAnalog(QWidget *parent)	:
 	m_frontBuffer = new TVScreenAnalogBuffer(5, 1);
 	m_backBuffer = new TVScreenAnalogBuffer(5, 1);
 
+    m_videoWidth = 560;
+    m_videoHeight = 420;
+    m_recording = false;
+
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(tick()));
-	m_updateTimer.start(20); // capped at 25 FPS
+	m_updateTimer.start(40); // capped at 25 FPS
 }
 
 TVScreenAnalog::~TVScreenAnalog()
 {
 	delete m_backBuffer;
 	delete m_frontBuffer;
+    delete m_img_buffer;
 }
 
 void TVScreenAnalog::cleanup()
@@ -282,6 +287,8 @@ void TVScreenAnalog::initializeGL()
 
 void TVScreenAnalog::initializeTextures(TVScreenAnalogBuffer *buffer)
 {
+    m_img_buffer = new int[m_videoWidth * m_videoHeight];
+
 	m_imageTexture = new QOpenGLTexture(QOpenGLTexture::Target2D);
 	m_lineShiftsTexture = new QOpenGLTexture(QOpenGLTexture::Target2D);
 	m_imageTexture->setSize(buffer->getWidth(), buffer->getHeight());
@@ -321,46 +328,46 @@ void TVScreenAnalog::tick()
 
 void TVScreenAnalog::paintGL()
 {
-	m_isDataChanged = false;
+    m_isDataChanged = false;
 
-	if (!m_shader)
-	{
-		glClearColor(0.2f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		return;
-	}
+    if (!m_shader)
+    {
+        glClearColor(0.2f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        return;
+    }
 
-	TVScreenAnalogBuffer *buffer = m_frontBuffer;
+    TVScreenAnalogBuffer* buffer = m_frontBuffer;
 
-	if (!m_imageTexture ||
-		m_imageTexture->width() != buffer->getWidth() ||
-		m_imageTexture->height() != buffer->getHeight())
-	{
-		initializeTextures(buffer);
-	}
+    if (!m_imageTexture ||
+        m_imageTexture->width() != buffer->getWidth() ||
+        m_imageTexture->height() != buffer->getHeight())
+    {
+        initializeTextures(buffer);
+    }
 
-	float imageWidth = buffer->getWidth();
-	float imageHeight = buffer->getHeight();
-	float texelWidth = 1.0f / imageWidth;
-	float texelHeight = 1.0f / imageHeight;
+    float imageWidth = buffer->getWidth();
+    float imageHeight = buffer->getHeight();
+    float texelWidth = 1.0f / imageWidth;
+    float texelHeight = 1.0f / imageHeight;
 
-	m_shader->bind();
-	m_shader->setUniformValue(m_textureLoc1, 0);
-	m_shader->setUniformValue(m_textureLoc2, 1);
-	m_shader->setUniformValue(m_imageWidthLoc, imageWidth);
-	m_shader->setUniformValue(m_imageHeightLoc, imageHeight);
-	m_shader->setUniformValue(m_texelWidthLoc, texelWidth);
-	m_shader->setUniformValue(m_texelHeightLoc, texelHeight);
+    m_shader->bind();
+    m_shader->setUniformValue(m_textureLoc1, 0);
+    m_shader->setUniformValue(m_textureLoc2, 1);
+    m_shader->setUniformValue(m_imageWidthLoc, imageWidth);
+    m_shader->setUniformValue(m_imageHeightLoc, imageHeight);
+    m_shader->setUniformValue(m_texelWidthLoc, texelWidth);
+    m_shader->setUniformValue(m_texelHeightLoc, texelHeight);
 
-	glActiveTexture(GL_TEXTURE0);
-	m_imageTexture->bind();
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-		buffer->getWidth(), buffer->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, buffer->getImageData());
+    glActiveTexture(GL_TEXTURE0);
+    m_imageTexture->bind();
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+        buffer->getWidth(), buffer->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, buffer->getImageData());
 
-	glActiveTexture(GL_TEXTURE1);
-	m_lineShiftsTexture->bind();
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-		1, buffer->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, buffer->getLineShiftData());
+    glActiveTexture(GL_TEXTURE1);
+    m_lineShiftsTexture->bind();
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+        1, buffer->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, buffer->getLineShiftData());
 
 	float rectHalfWidth = 1.0f + 4.0f / (imageWidth - 4.0f);
 	GLfloat vertices[] =
@@ -402,7 +409,17 @@ void TVScreenAnalog::paintGL()
         glEnableVertexAttribArray(m_texCoordAttribIndex);
     }
 
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+    if (m_recording)
+    {
+        if (m_file != NULL)
+        {
+            glReadPixels(0, 0, m_videoWidth, m_videoHeight, GL_RGBA, GL_UNSIGNED_BYTE, m_img_buffer);
+
+            fwrite(m_img_buffer, sizeof(int) * m_videoWidth * m_videoHeight, 1, m_file);
+        }
+    }
 
     if (m_vao)
     {
