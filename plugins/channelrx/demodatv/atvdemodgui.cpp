@@ -40,7 +40,7 @@
 #include "atvdemod.h"
 
 #define ATV_REC_STRING_SIZE   (255)
-#define ATV_REC_STRING_FORMAT "%s video-%02d-%02d-%4d-%02d-%02d-%02d-%lldHz.mp4"
+#define ATV_REC_STRING_FORMAT "%s .\\video\\video-%02d-%02d-%4d-%02d-%02d-%02d-%lldHz.mp4"
 #define ATV_REC_CMD_STRING    "ffmpeg.exe -r 20 -f rawvideo -pix_fmt rgba -s 560x420 -i - " \
                               "-threads 0 -preset fast -y -pix_fmt yuv420p -crf 21 -vf vflip"
 
