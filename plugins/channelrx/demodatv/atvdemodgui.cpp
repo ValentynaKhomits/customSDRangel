@@ -39,10 +39,10 @@
 
 #include "atvdemod.h"
 
-#define ATV_REC_STRING_SIZE   (255)
-#define ATV_REC_STRING_FORMAT "%s .\\video\\video-%02d-%02d-%4d-%02d-%02d-%02d-%lldHz.mp4"
-#define ATV_REC_CMD_STRING    "ffmpeg.exe -r 20 -f rawvideo -pix_fmt rgba -s 560x420 -i - " \
-                              "-threads 0 -preset fast -y -pix_fmt yuv420p -crf 21 -vf vflip"
+#define ATV_REC_STRING_SIZE      (512)
+#define ATV_REC_STRING_FORMAT    "%s\\ffmpeg.exe %s %s\\video\\video-%02d-%02d-%4d-%02d-%02d-%02d-%lldHz.mp4"
+#define ATV_FFMPEG_ARGS_STRING   "-r 20 -f rawvideo -pix_fmt rgba -s 560x420 -i - " \
+                                 "-threads 0 -preset fast -y -pix_fmt yuv420p -crf 21 -vf vflip"
 
 ATVDemodGUI* ATVDemodGUI::create(PluginAPI* objPluginAPI,
         DeviceUISet *deviceUISet,
@@ -541,12 +541,19 @@ void ATVDemodGUI::on_reset_clicked(bool checked)
 
 void ATVDemodGUI::on_record_clicked(bool checked)
 {
+    char ffmpge_exec_path[MAX_PATH];
     char file_name[ATV_REC_STRING_SIZE] = { 0 };
     time_t now = time(0);
     struct tm tstruct = *localtime(&now);
 
-    snprintf(file_name, 255, ATV_REC_STRING_FORMAT,
-        ATV_REC_CMD_STRING,
+    GetCurrentDirectory(MAX_PATH, ffmpge_exec_path);
+
+    qDebug() << ffmpge_exec_path;
+
+    snprintf(file_name, ATV_REC_STRING_SIZE, ATV_REC_STRING_FORMAT,
+        ffmpge_exec_path,
+        ATV_FFMPEG_ARGS_STRING,
+        ffmpge_exec_path,
         tstruct.tm_mday, tstruct.tm_mon, (int)(1900U + tstruct.tm_year),
         tstruct.tm_hour, tstruct.tm_min, tstruct.tm_sec,
         m_deviceCenterFrequency);
