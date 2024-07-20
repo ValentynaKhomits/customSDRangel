@@ -548,13 +548,11 @@ void ATVDemodGUI::on_record_clicked(bool checked)
 
     GetCurrentDirectory(MAX_PATH, ffmpge_exec_path);
 
-    qDebug() << ffmpge_exec_path;
-
     snprintf(file_name, ATV_REC_STRING_SIZE, ATV_REC_STRING_FORMAT,
         ffmpge_exec_path,
         ATV_FFMPEG_ARGS_STRING,
         ffmpge_exec_path,
-        tstruct.tm_mday, tstruct.tm_mon, (int)(1900U + tstruct.tm_year),
+        tstruct.tm_mday, tstruct.tm_mon + 1U, (int)(1900U + tstruct.tm_year),
         tstruct.tm_hour, tstruct.tm_min, tstruct.tm_sec,
         m_deviceCenterFrequency);
 
